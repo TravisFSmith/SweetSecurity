@@ -45,11 +45,7 @@ sudo dpkg -i critical-stack-intel-arm.deb
 sudo -u critical-stack critical-stack-intel api $cs_api 
 sudo rm critical-stack-intel-arm.deb
 
-
-#Get Sweet Security Files
 cd /home/pi
-sudo git clone https://github.com/TravisFSmith/SweetSecurity
-
 
 #Install ElasticSearch
 echo "Installing Elastic Search"
