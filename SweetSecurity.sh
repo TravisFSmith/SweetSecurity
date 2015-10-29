@@ -19,7 +19,7 @@ emailPwd=${emailPwd:-P@55word}
 cd /home/pi
 
 echo "Installing Pre-Requisites..."
-sudo apt-get -y install cmake make gcc g++ flex bison libpcap-dev libssl-dev python-dev swig zlib1g-dev ant zip
+sudo apt-get -y install cmake make gcc g++ flex bison libpcap-dev libssl-dev python-dev swig zlib1g-dev ant zip nmap
 
 
 
