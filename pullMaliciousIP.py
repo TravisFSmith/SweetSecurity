@@ -3,7 +3,7 @@
 import urllib2, re
 
 def writeYAML():
-	yamlFile = open('/etc/logstash/maliciousIP.yaml','w')
+	yamlFile = open('/opt/logstash/maliciousIP.yaml','w')
 	url='http://www.malwaredomainlist.com/hostslist/ip.txt'
 	html = urllib2.urlopen(url)
 	for line in html.readlines():
