@@ -111,6 +111,10 @@ sudo sed -i -- "s/SMTP_PORT/"$smtpPort"/g" /opt/logstash/logstash.conf
 sudo sed -i -- "s/EMAIL_USER/"$emailAddr"/g" /opt/logstash/logstash.conf
 sudo sed -i -- "s/EMAIL_PASS/"$emailPwd"/g" /opt/logstash/logstash.conf
 
+
+cd /home/pi
+sudo cp SweetSecurity/networkDiscovery.py /opt/SweetSecurity/networkDiscovery.py
+sudo cp SweetSecurity/SweetSecurityDB.py /opt/SweetSecurity/SweetSecurityDB.py
 #Configure Network Discovery Scripts
 sudo sed -i -- "s/SMTP_HOST/"$smtpHost"/g" /opt/SweetSecurity/networkDiscovery.py
 sudo sed -i -- "s/SMTP_PORT/"$smtpPort"/g" /opt/SweetSecurity/networkDiscovery.py
