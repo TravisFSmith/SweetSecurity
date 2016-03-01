@@ -62,7 +62,7 @@ sudo tar -xzf logstash-1.5.3.tar.gz
 sudo mv logstash-1.5.3/ /opt/logstash/ 
 sudo rm logstash-1.5.3.tar.gz
 cd /home/pi
-#sudo git clone https://github.com/jnr/jffi.git
+sudo git clone https://github.com/jnr/jffi.git
 cd jffi
 sudo ant jar
 sudo cp build/jni/libjffi-1.2.so /opt/logstash/vendor/jruby/lib/jni/arm-Linux
