@@ -49,18 +49,18 @@ cd /home/pi
 
 #Install ElasticSearch
 echo "Installing Elastic Search"
-sudo wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.1.deb
-sudo dpkg -i elasticsearch-1.7.1.deb
-sudo rm elasticsearch-1.7.1.deb
+sudo wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.3.2.deb
+sudo dpkg -i elasticsearch-2.3.2.deb
+sudo rm elasticsearch-2.3.2.deb
 sudo update-rc.d elasticsearch defaults
 
 
 #Install LogStash
 echo "Installing Logstash"
-sudo wget https://download.elastic.co/logstash/logstash/logstash-1.5.3.tar.gz
-sudo tar -xzf logstash-1.5.3.tar.gz
-sudo mv logstash-1.5.3/ /opt/logstash/ 
-sudo rm logstash-1.5.3.tar.gz
+sudo wget https://download.elastic.co/logstash/logstash/logstash-2.3.2.tar.gz
+sudo tar -xzf logstash-2.3.2.tar.gz
+sudo mv logstash-2.3.2/ /opt/logstash/ 
+sudo rm logstash-2.3.2.tar.gz
 cd /home/pi
 sudo git clone https://github.com/jnr/jffi.git
 cd jffi
@@ -86,6 +86,7 @@ echo "Installing Kibana"
 sudo wget https://download.elastic.co/kibana/kibana/kibana-4.1.0-linux-x86.tar.gz
 sudo tar -xzf kibana-4.1.0-linux-x86.tar.gz
 sudo mv kibana-4.1.0-linux-x86/ /opt/kibana/
+sudo dpkg remove nodejs-legacy		#Remove nodejs-legacy on Pi3
 sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 sudo dpkg -i node_latest_armhf.deb
 sudo mv /opt/kibana/node/bin/node /opt/kibana/node/bin/node.orig
