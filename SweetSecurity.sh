@@ -83,9 +83,9 @@ sudo cp SweetSecurity/bro.rule /opt/logstash/custom_patterns
 
 #Install Kibana
 echo "Installing Kibana"
-sudo wget https://download.elastic.co/kibana/kibana/kibana-4.1.0-linux-x86.tar.gz
-sudo tar -xzf kibana-4.1.0-linux-x86.tar.gz
-sudo mv kibana-4.1.0-linux-x86/ /opt/kibana/
+sudo wget https://download.elastic.co/kibana/kibana/kibana-4.5.0-linux-x86.tar.gz
+sudo tar -xzf kibana-4.5.0-linux-x86.tar.gz
+sudo mv kibana-4.5.0-linux-x86/ /opt/kibana/
 sudo apt-get -y remove nodejs-legacy nodejs nodered		#Remove nodejs on Pi3
 sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 sudo dpkg -i node_latest_armhf.deb
