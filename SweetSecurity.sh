@@ -122,8 +122,15 @@ sudo sed -i -- "s/SMTP_PORT/"$smtpPort"/g" /opt/SweetSecurity/networkDiscovery.p
 sudo sed -i -- "s/EMAIL_USER/"$emailAddr"/g" /opt/SweetSecurity/networkDiscovery.py
 sudo sed -i -- "s/EMAIL_PASS/"$emailPwd"/g" /opt/SweetSecurity/networkDiscovery.py
 
+
 #Restart services
 echo "Restarting ELK services"
 sudo service elasticsearch restart
 sudo service kibana restart
 sudo service logstash restart
+
+
+#Deploy and start BroIDS
+echo "Deploying and starting BroIDS"
+sudo /opt/nsm/bro/bin/broctl deploy
+sudo /opt/nsm/bro/bin/broctl start
