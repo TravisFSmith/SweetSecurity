@@ -17,7 +17,7 @@
 ### END INIT INFO
 #
 #
-. /etc/init.d/functions
+. /lib/lsb/init-functions
 
 PIDFILE="/var/run/kibana.pid"
 KIBANA_DIR="/opt/kibana/"
