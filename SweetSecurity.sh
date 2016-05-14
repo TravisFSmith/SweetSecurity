@@ -1,5 +1,6 @@
 #software versions
 bro_version=2.4.1
+elasticsearch_version=2.3.2
 
 
 echo "Please enter your Critical Stack API Key: "
@@ -52,9 +53,9 @@ cd /home/pi
 
 #Install ElasticSearch
 echo "Installing Elastic Search"
-sudo wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.3.2.deb
-sudo dpkg -i elasticsearch-2.3.2.deb
-sudo rm elasticsearch-2.3.2.deb
+sudo wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$elasticsearch_version.deb
+sudo dpkg -i elasticsearch-$elasticsearch_version.deb
+sudo rm elasticsearch-$elasticsearch_version.deb
 sudo update-rc.d elasticsearch defaults
 
 
