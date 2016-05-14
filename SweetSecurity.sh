@@ -1,7 +1,7 @@
 #software versions
 bro_version=2.4.1
 elasticsearch_version=2.3.2
-
+logstash_version=2.3.2-1
 
 echo "Please enter your Critical Stack API Key: "
 read cs_api
@@ -61,9 +61,9 @@ sudo update-rc.d elasticsearch defaults
 
 #Install LogStash
 echo "Installing Logstash"
-sudo wget https://download.elastic.co/logstash/logstash/packages/debian/logstash_2.3.2-1_all.deb
-sudo dpkg -i logstash_2.3.2-1_all.deb
-sudo rm logstash_2.3.2-1_all.deb
+sudo wget https://download.elastic.co/logstash/logstash/packages/debian/logstash_${logstash_version}_all.deb
+sudo dpkg -i logstash_${logstash_version}_all.deb
+sudo rm logstash_${logstash_version}_all.deb
 cd /home/pi
 sudo git clone https://github.com/jnr/jffi.git
 cd jffi
