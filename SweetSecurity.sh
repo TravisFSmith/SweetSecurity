@@ -27,8 +27,7 @@ sudo apt-get -y install cmake make gcc g++ flex bison libpcap-dev libssl-dev pyt
 echo "Installing Bro"
 sudo wget https://www.bro.org/downloads/release/bro-2.4.1.tar.gz
 sudo tar -xzf bro-2.4.1.tar.gz
-sudo mkdir /opt/nsm
-sudo mkdir /opt/nsm/bro
+sudo mkdir -p /opt/nsm/bro
 cd bro-2.4.1
 sudo ./configure --prefix=/opt/nsm/bro
 sudo make     
