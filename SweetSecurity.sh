@@ -2,6 +2,7 @@
 bro_version=2.4.1
 elasticsearch_version=2.3.2
 logstash_version=2.3.2-1
+kibana_version=4.5.0
 
 echo "Please enter your Critical Stack API Key: "
 read cs_api
@@ -82,9 +83,9 @@ sudo mkdir /etc/logstash/translate
 
 #Install Kibana
 echo "Installing Kibana"
-sudo wget https://download.elastic.co/kibana/kibana/kibana-4.5.0-linux-x86.tar.gz
-sudo tar -xzf kibana-4.5.0-linux-x86.tar.gz
-sudo mv kibana-4.5.0-linux-x86/ /opt/kibana/
+sudo wget https://download.elastic.co/kibana/kibana/${kibana_version}-linux-x86.tar.gz
+sudo tar -xzf kibana-${kibana_version}-linux-x86.tar.gz
+sudo mv kibana-${kibana_version}-linux-x86/ /opt/kibana/
 sudo apt-get -y remove nodejs-legacy nodejs nodered		#Remove nodejs on Pi3
 sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 sudo dpkg -i node_latest_armhf.deb
