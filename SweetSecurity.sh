@@ -1,3 +1,7 @@
+#software versions
+bro_version=2.4.1
+
+
 echo "Please enter your Critical Stack API Key: "
 read cs_api
 
@@ -25,23 +29,23 @@ sudo apt-get -y install cmake make gcc g++ flex bison libpcap-dev libssl-dev pyt
 
 #Install Bro
 echo "Installing Bro"
-sudo wget https://www.bro.org/downloads/release/bro-2.4.1.tar.gz
-sudo tar -xzf bro-2.4.1.tar.gz
+sudo wget https://www.bro.org/downloads/release/bro-$bro_version.tar.gz
+sudo tar -xzf bro-$bro_version.tar.gz
 sudo mkdir -p /opt/nsm/bro
-cd bro-2.4.1
+cd bro-$bro_version
 sudo ./configure --prefix=/opt/nsm/bro
-sudo make     
+sudo make
 sudo make install
 cd ..
-sudo rm bro-2.4.1.tar.gz
-sudo rm -rf bro-2.4.1/
+sudo rm bro-$bro_version.tar.gz
+sudo rm -rf bro-$bro_version
 
 
 #Install Critical Stack
 echo "Installing Critical Stack Agent"
 sudo wget https://intel.criticalstack.com/client/critical-stack-intel-arm.deb
 sudo dpkg -i critical-stack-intel-arm.deb
-sudo -u critical-stack critical-stack-intel api $cs_api 
+sudo -u critical-stack critical-stack-intel api $cs_api
 sudo rm critical-stack-intel-arm.deb
 
 cd /home/pi
