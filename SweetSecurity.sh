@@ -1,3 +1,9 @@
+#software versions
+bro_version=2.4.1
+elasticsearch_version=2.3.2
+logstash_version=2.3.2-1
+kibana_version=4.5.0
+
 echo "Please enter your Critical Stack API Key: "
 read cs_api
 
@@ -25,41 +31,40 @@ sudo apt-get -y install cmake make gcc g++ flex bison libpcap-dev libssl-dev pyt
 
 #Install Bro
 echo "Installing Bro"
-sudo wget https://www.bro.org/downloads/release/bro-2.4.1.tar.gz
-sudo tar -xzf bro-2.4.1.tar.gz
-sudo mkdir /opt/nsm
-sudo mkdir /opt/nsm/bro
-cd bro-2.4.1
+sudo wget https://www.bro.org/downloads/release/bro-$bro_version.tar.gz
+sudo tar -xzf bro-$bro_version.tar.gz
+sudo mkdir -p /opt/nsm/bro
+cd bro-$bro_version
 sudo ./configure --prefix=/opt/nsm/bro
-sudo make     
+sudo make
 sudo make install
 cd ..
-sudo rm bro-2.4.1.tar.gz
-sudo rm -rf bro-2.4.1/
+sudo rm bro-$bro_version.tar.gz
+sudo rm -rf bro-$bro_version
 
 
 #Install Critical Stack
 echo "Installing Critical Stack Agent"
 sudo wget https://intel.criticalstack.com/client/critical-stack-intel-arm.deb
 sudo dpkg -i critical-stack-intel-arm.deb
-sudo -u critical-stack critical-stack-intel api $cs_api 
+sudo -u critical-stack critical-stack-intel api $cs_api
 sudo rm critical-stack-intel-arm.deb
 
 cd /home/pi
 
 #Install ElasticSearch
 echo "Installing Elastic Search"
-sudo wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.3.2.deb
-sudo dpkg -i elasticsearch-2.3.2.deb
-sudo rm elasticsearch-2.3.2.deb
+sudo wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$elasticsearch_version.deb
+sudo dpkg -i elasticsearch-$elasticsearch_version.deb
+sudo rm elasticsearch-$elasticsearch_version.deb
 sudo update-rc.d elasticsearch defaults
 
 
 #Install LogStash
 echo "Installing Logstash"
-sudo wget https://download.elastic.co/logstash/logstash/packages/debian/logstash_2.3.2-1_all.deb
-sudo dpkg -i logstash_2.3.2-1_all.deb
-sudo rm logstash_2.3.2-1_all.deb
+sudo wget https://download.elastic.co/logstash/logstash/packages/debian/logstash_${logstash_version}_all.deb
+sudo dpkg -i logstash_${logstash_version}_all.deb
+sudo rm logstash_${logstash_version}_all.deb
 cd /home/pi
 sudo git clone https://github.com/jnr/jffi.git
 cd jffi
@@ -78,9 +83,9 @@ sudo mkdir /etc/logstash/translate
 
 #Install Kibana
 echo "Installing Kibana"
-sudo wget https://download.elastic.co/kibana/kibana/kibana-4.5.0-linux-x86.tar.gz
-sudo tar -xzf kibana-4.5.0-linux-x86.tar.gz
-sudo mv kibana-4.5.0-linux-x86/ /opt/kibana/
+sudo wget https://download.elastic.co/kibana/kibana/${kibana_version}-linux-x86.tar.gz
+sudo tar -xzf kibana-${kibana_version}-linux-x86.tar.gz
+sudo mv kibana-${kibana_version}-linux-x86/ /opt/kibana/
 sudo apt-get -y remove nodejs-legacy nodejs nodered		#Remove nodejs on Pi3
 sudo wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 sudo dpkg -i node_latest_armhf.deb
