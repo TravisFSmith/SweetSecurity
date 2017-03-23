@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+<!- Refresh Page Every 5 Seconds ->
+<meta http-equiv="refresh" content="5" >
+<section>
+	<div class="container">
+		<div class="panel-group">
+			{% if esHealth=="Started" and kHealth=="Started"%}<div class="panel panel-success">{%else%}<div class="panel panel-danger">{%endif%}	
+				<div class="panel-heading">System Services</div>
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-xs-5"><strong>Elasticsearch</strong> <span class="glyphicon {% if esHealth == "Started" %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
+						<div class="col-xs-7"><button onclick="manageService('elasticsearch','start')" type="button" class="btn {%if esHealth == "Started" %} btn-default btn-sm" disabled{% else %} btn-success btn-sm"{%endif%}>Start</button> <button onclick="manageService('elasticsearch','restart')" type="button" class="btn btn-warning btn-sm">Restart</button> <button onclick="manageService('elasticsearch','stop')" type="button" class="btn{% if esHealth == "Stopped"%} btn-default btn-sm" disabled{% else %} btn-danger btn-sm"{%endif%}>Stop</button></div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Kibana</strong> <span class="glyphicon {% if kHealth == "Started" %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
+						<div class="col-xs-7"><button onclick="manageService('kibana','start')"  type="button" class="btn {%if kHealth == "Started" %} btn-default btn-sm" disabled{% else %} btn-success btn-sm"{%endif%}>Start</button> <button onclick="manageService('kibana','restart')" type="button" class="btn btn-warning btn-sm">Restart</button> <button onclick="manageService('kibana','stop')" type="button" class="btn{% if kHealth == "Stopped"%} btn-default btn-sm" disabled{% else %} btn-danger btn-sm"{%endif%}>Stop</button></div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Disk Usage</strong></div>
+						<div class="col-xs-7">
+							<div class="progress">
+ 								<div class="progress-bar {% if diskUsage < 70 %}progress-bar-success{% elif diskUsage < 90 %}progress-bar-warning{% else %}progress-bar-danger{% endif %}" role="progressbar" aria-valuenow="{{diskUsage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{diskUsage}}%">
+									{{diskUsage}}% Used
+									<span class="sr-only">{{diskUsage}}% Free</span>
+ 								</div>
+							</div>
+						</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Memory Usage</strong></div>
+						<div class="col-xs-7">
+							<div class="progress">
+								<div class="progress-bar {% if memUsage['percentUsed'] < 70 %}progress-bar-success{% elif memUsage['percentUsed'] < 90 %}progress-bar-warning{% else %}progress-bar-danger{% endif %}" role="progressbar" aria-valuenow="{{memUsage['percentUsed']}}" aria-valuemin="0" aria-valuemax="100" style="width:{{memUsage['percentUsed']}}%">
+									{{memUsage['consumed']}}M/{{memUsage['available']}}M Used
+									<span class="sr-only">{{memUsage['percentUsed']}}% Free</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+{% for sensor in sensorInfo %}
+			{% if sensor['broStatus']=="running" and sensor['logstash']=="Started"%}<div class="panel panel-success">{%else%}<div class="panel panel-danger">{%endif%}
+				<div class="panel-heading">Sensor Services - <b>{{sensor['sensorName']}}</b></div>
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-xs-5"><strong>Last Update</strong></div>
+						<div class="col-xs-7">{{sensor['time']}} - ({{sensor['timeSince']}} minutes ago)</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Logstash</strong> <span class="glyphicon {% if sensor['logstash'] == "Started" %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
+						<div class="col-xs-7">{{sensor['logstash']}}</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Bro IDS</strong> <span class="glyphicon {% if sensor['broStatus'] == "running" %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
+						<div class="col-xs-7">{{sensor['broStatus']}}</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Disk Usage</strong></div>
+						<div class="col-xs-7">
+							<div class="progress">
+ 								<div class="progress-bar {% if sensor['diskUsage'] < 70 %}progress-bar-success{% elif sensor['diskUsage'] < 90 %}progress-bar-warning{% else %}progress-bar-danger{% endif %}" role="progressbar" aria-valuenow="{{sensor['diskUsage']}}" aria-valuemin="0" aria-valuemax="100" style="width:{{sensor['diskUsage']}}%">
+									{{sensor['diskUsage']}}% Used
+									<span class="sr-only">{{sensor['diskUsage']}}% Free</span>
+ 								</div>
+							</div>
+						</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Memory Usage</strong></div>
+						<div class="col-xs-7">
+							<div class="progress">
+								<div class="progress-bar {% if sensor['memPercent'] < 70 %}progress-bar-success{% elif sensor['memPercent'] < 90 %}progress-bar-warning{% else %}progress-bar-danger{% endif %}" role="progressbar" aria-valuenow="{{sensor['memPercent']}}" aria-valuemin="0" aria-valuemax="100" style="width:{{sensor['memPercent']}}%">
+									{{sensor['memConsumed']}}M/{{sensor['memInstalled']}}M Used
+									<span class="sr-only">{{sensor['memPercent']}}% Free</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+{% endfor %}
+		<a href="/consolidateDevices" class="btn btn-info" role="button">Consolidate Devices</a>
+		</div>
+	</div>
+
+<script>
+function manageService(serviceName,action) {
+  $.post('/settings/manageService',
+      { 
+        'serviceName': serviceName,
+        'action': action
+      },
+      function (response, status) {
+        window.location.reload();
+      }
+    );
+}
+
+</script>
+
+
+</section>
+{% endblock %}
+

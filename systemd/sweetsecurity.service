@@ -1,0 +1,10 @@
+[Unit]
+Description=Sweet Security
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /opt/SweetSecurity/sweetSecurity.py
+
+[Install]
+WantedBy=multi-user.target

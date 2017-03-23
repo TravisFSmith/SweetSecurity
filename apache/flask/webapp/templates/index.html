@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+
+{% if deviceList|length == 0 %}
+<div class="container">
+  <div class="jumbotron">
+    <h1>Welcome to Sweet Security</h1>      
+    <p>There have been no devices discovered yet. Head over to <a href="/settings">settings tab</a> to make sure everything is running properly. </p>
+  </div>   
+</div>
+{% endif %}
+
+	<div class="container">
+		<div class="row">
+{% for device in deviceList %}
+			<div class="col-xs-4">
+				<div class="w3-card-4" >
+					<header class="w3-container w3-{% if device['ignore'] == '0' %}green{% else %}red{% endif %}">
+						<h3 class="pull-left">{{device['nickname']|safe}}</h3>
+						<h3 class="pull-right"data-toggle="modal" data-target="#renameDevice{{loop.index}}" style="cursor: pointer;"><span class="glyphicon glyphicon-edit" ></span></h3>
+					</header>
+
+
+
+					<div class="w3-container">
+						<p><b>IP</b>: {{device['ip']|safe}}</p>
+						<p><b>Vendor</b>: {{device['vendor']|safe}}</p>
+						<p><b>Open Ports</b>: {{device['openPorts']}}</p>						
+						<p><b>Monitored</b>: {% if device['ignore'] == '0' %}Yes{% else %}No{% endif %}</p>
+					</div>
+
+					<button class="w3-btn-block w3-dark-grey" onclick="location.href='/device/{{device['mac']}}'" >More Info...</button>
+
+				</div>
+
+<div id="renameDevice{{loop.index}}" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Rename Device</h4>
+      </div>
+      <div class="modal-body">
+        <p>Hostname: {{device['hostname']|safe}}</p>
+        <p>Previous Name: {{device['nickname']|safe}}</p>
+        <p><form id="{{loop.index}}" action="/renameDevice" method="post">
+             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+             <input name="macAddress" type=hidden value="{{device['mac']}}">
+             <input class="form-control" id="nickName" name="nickName" type="text" placeholder="New Name">
+           </form>
+         </p>
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col-xs-4">
+              <button form="{{loop.index}}" type="submit" class="btn btn-default center-block">Save</button>
+          </div>
+          <div class="col-xs-4">
+          </div>
+          <div class="col-xs-4">
+            <button type="button" class="btn btn-default center-block" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+			</div>
+			{% if loop.index is divisibleby 3 %}
+		</div>
+		<br>
+		<div class="row">
+			{% endif %}
+{% endfor %}
+		</div>
+	</div>
+</section>
+
+
+
+{% endblock %}
+
+

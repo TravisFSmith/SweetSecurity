@@ -1,0 +1,72 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sweet Security</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/w3.css">
+  <link rel="stylesheet" href="/static/css/local.css">
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+</head>
+
+
+<body>
+    {% block body %}
+	<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button  class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span> 
+				</button>
+      				<a class="navbar-brand" href="/"><img src="/static/logo.jpg" alt="logo" style="width:100px;height:50px;margin-top:-15px"></a>
+			</div>
+			<div class="collapse navbar-collapse" >
+				<ul class="nav navbar-nav">
+					<li><a href="/">Devices</a></li> 
+					<li><a href="/settings">Settings</a></li>
+					<li><a href="https://{{serverIP}}:5602/">Kibana</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+
+
+
+
+
+
+	<div id="main-div" class="with-margins">
+    {# One-time system messages called Flash messages #}
+    {% block flash_messages %}
+        {%- with messages = get_flashed_messages(with_categories=true) -%}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category=='error' %}
+                        {% set category='danger' %}
+                    {% endif %}
+		<div class="alert alert-{{category}}">{{ message|safe }}</div>
+                {% endfor %}
+            {% endif %}
+        {%- endwith %}
+    {% endblock %}
+
+    {% block main %}{% block content %}{% endblock %}{% endblock %}
+	</div>
+
+	<br/>
+	<hr class="no-margins"/>
+	<div id="footer-div" class="clearfix with-margins">
+		<div class="pull-left">Sweet Security</div>
+ 		<div class="pull-right">&copy; 2017 Sweet Security</div>
+	</div>
+    {% endblock %}
+</body>
+</html>
+

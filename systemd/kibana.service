@@ -1,0 +1,9 @@
+[Unit]
+Description=Kibana
+
+[Service]
+ExecStart=/opt/kibana/bin/kibana
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
