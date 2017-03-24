@@ -13,10 +13,6 @@ from install import kibana
 from install import sweetSecurity
 from install import apache
 
-
-#TODO: Settings Page Update
-#	change sensor header to red if last update is over 5 minutes old
-#	Add glyphicon to last update row for success/failure
 #Issue: When using OpenDNS, no hostname resolution
 #TODO: build kibana searches/visualizations/dashboards
 #TODO: build kibana stuff for sweet_security index too

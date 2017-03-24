@@ -44,11 +44,11 @@
 				</div>
 			</div>
 {% for sensor in sensorInfo %}
-			{% if sensor['broStatus']=="running" and sensor['logstash']=="Started"%}<div class="panel panel-success">{%else%}<div class="panel panel-danger">{%endif%}
+			{% if sensor['broStatus']=="running" and sensor['logstash']=="Started" and sensor['timeSince'] <= 5 %}<div class="panel panel-success">{%else%}<div class="panel panel-danger">{%endif%}
 				<div class="panel-heading">Sensor Services - <b>{{sensor['sensorName']}}</b></div>
 				<div class="panel-body">
 					<div class="row">
-						<div class="col-xs-5"><strong>Last Update</strong></div>
+						<div class="col-xs-5"><strong>Last Update</strong> <span class="glyphicon {% if sensor['timeSince'] <= 5 %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
 						<div class="col-xs-7">{{sensor['time']}} - ({{sensor['timeSince']}} minutes ago)</div>
 					</div>
 					<br />
