@@ -17,17 +17,20 @@ logger = logs.setup()
 
 def startGetConfig():
 	while 1:
-		serverConfig=json.loads(server.getConfig())
-		for device in serverConfig['deviceList']:
-			localConfig=sweetSecurityDB.getDeviceSpoofStatus(device['mac'])
-			if str(localConfig[0]) != str(device['ignore']):
-				if device['ignore'] == '1':
-					logger.info('Stop Spoofing %s' % device['mac'])
-					result=sweetSecurityDB.dontSpoof(device['mac'])
-				elif device['ignore'] == '0':
-					logger.info('Start Spoofing %s' % device['mac'])
-					result=sweetSecurityDB.spoof(device['mac'])
-				logger.info(result)
+		try:
+			serverConfig=json.loads(server.getConfig())
+			for device in serverConfig['deviceList']:
+				localConfig=sweetSecurityDB.getDeviceSpoofStatus(device['mac'])
+				if str(localConfig[0]) != str(device['ignore']):
+					if device['ignore'] == '1':
+						logger.info('Stop Spoofing %s' % device['mac'])
+						result=sweetSecurityDB.dontSpoof(device['mac'])
+					elif device['ignore'] == '0':
+						logger.info('Start Spoofing %s' % device['mac'])
+						result=sweetSecurityDB.spoof(device['mac'])
+					logger.info(result)
+		except:
+			pass
 		sleep(5)
 
 def startPingSweep():
