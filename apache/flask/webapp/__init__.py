@@ -296,7 +296,7 @@ def create_app():
                         'ignore': str(host['_source']['ignore']),
                         'firstSeen': datetime.datetime.fromtimestamp(firstSeen).strftime('%Y-%m-%d %H:%M:%S'),
                         'lastSeen': datetime.datetime.fromtimestamp(lastSeen).strftime('%Y-%m-%d %H:%M:%S')}
-                portCountQuery = {"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
+                portCountQuery = {"sort":[{ "port" : {"order" : "asc"}}],"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
                 portInfo=es.search(esService, portCountQuery, 'sweet_security', 'ports')
                 if portInfo is not None:
                     for port in portInfo['hits']['hits']:
