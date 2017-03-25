@@ -47,7 +47,7 @@ def install(chosenInterface,webServer):
 		#ignore communication between sensor and webServer, writes a ton of noise
 		if webServer != 'localhost':
 			with open("/opt/nsm/bro/etc/broctl.cfg", "a") as broCtlFile:
-				broCtlFile.write("\nbroargs = -f 'not host %s\n'" % webServer)
+				broCtlFile.write("\nbroargs = -f 'not host %s'\n" % webServer)
 		
 		print "  Deploying and Starting Bro"
 		os.popen('sudo /opt/nsm/bro/bin/broctl deploy').read()
