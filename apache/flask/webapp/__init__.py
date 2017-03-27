@@ -572,6 +572,27 @@ def create_app():
                 return "unknown action"
         return "unknown service"
 
+    @app.route('/deleteSensor', methods=['POST'])
+    def deleteSensor():
+        sensorName=''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "sensorName":
+                     sensorName=request.form['sensorName']
+        if len(sensorName)==0:
+            flash(u'Unknown Sensor Name', 'error')
+            return redirect('/settings')
+        sensorInfo = []
+        sensorQuery = {"query": {"bool": {"must": [{"exists": {"field": "logstashHealth"}}, {"match": {"host": sensorName}}]}}}
+        sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs')
+        docCount = sensorHostData['hits']['total']
+        sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs', docCount)
+        for sensor in sensorHostData['hits']['hits']:
+            es.delete(esService, sensor['_index'], 'logs', sensor['_id'])
+        flash(u'Sensor Deleted')
+        return redirect('/settings')
+
     @app.route('/consolidateDevices')
     def consolidateDevices():
         matchAll = {"query": {"match_all": {}}}

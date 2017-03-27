@@ -5,9 +5,11 @@ def write(es,body,index,doc_type):
 	except Exception, e:
 		return e
 
-def search(es,body,index,doc_type):
+def search(es,body,index,doc_type,size=None):
+	if size is None:
+		size=1000
 	try:
-		res = es.search(index=index, doc_type=doc_type, body=body, size=1000)
+		res = es.search(index=index, doc_type=doc_type, body=body, size=size)
 		return res
 	except Exception, e:
 		return None

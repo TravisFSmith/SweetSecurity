@@ -85,6 +85,8 @@
 							</div>
 						</div>
 					</div>
+                    <br />
+                    <button onclick="deleteSensor('{{sensor['sensorName']}}')"  type="button" class="btn btn-danger btn-sm">Delete Sensor</button>
 				</div>
 			</div>
 {% endfor %}
@@ -97,7 +99,20 @@ function manageService(serviceName,action) {
   $.post('/settings/manageService',
       { 
         'serviceName': serviceName,
-        'action': action
+        'action': action,
+        'csrf_token': '{{ csrf_token() }}'
+      },
+      function (response, status) {
+        window.location.reload();
+      }
+    );
+}
+
+function deleteSensor(sensorName) {
+  $.post('deleteSensor',
+      {
+        'sensorName': sensorName,
+        'csrf_token': '{{ csrf_token() }}'
       },
       function (response, status) {
         window.location.reload();
