@@ -179,7 +179,7 @@ if __name__=="__main__":
 		os.popen('sudo htpasswd -cb /etc/apache2/.elasticsearch %s "%s"' % (elasticUser,elasticPass)).read()
 		elasticSearch.install()
 		kibana.install(chosenInterfaceIP)
-		print "  Restarting Apache"
+		print "Restarting Apache"
 		os.popen('sudo service apache2 restart').read()
 		logstash.install('localhost',elasticUser,elasticPass)
 		sweetSecurity.install(chosenInterface)
@@ -226,5 +226,5 @@ if __name__=="__main__":
 		elasticSearch.install()
 		print "  Creating elasticsearch credentials"
 		kibana.install(chosenInterfaceIP)
-		print "  Restarting Apache"
+		print "Restarting Apache"
 		os.popen('sudo service apache2 restart').read()
