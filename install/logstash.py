@@ -128,6 +128,8 @@ def install(esServer,esUser,esPass):
 						else:
 							line = ''
 					fileOut.write(line)
+		#Give logstash user access to read kern.log
+		os.popen('sudo usermod -a -G adm logstash').read()
 		#Delete file with user stuff and put old one back.
 		shutil.copyfile('logstash/conf/logstash.conf', '/etc/logstash/conf.d/logstash.conf')
 		os.remove('logstash/conf/logstash.conf')

@@ -16,6 +16,14 @@ def macAddress(macAddress):
 	else:
 		return False
 
+def url(url):
+	urlMatch= re.match(r"^([a-zA-Z0-9][a-zA-Z0-9\-\_]+[a-zA-Z0-9]\.)+([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\_])+[A-Za-z0-9]$",url)
+	ipMatch= re.match(r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",url)
+	if urlMatch or ipMatch:
+		return True
+	else:
+		return False
+
 def hostname(hostname):
 	hostnameMatch= re.match(r"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\_]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\_]*[A-Za-z0-9])$",hostname)
 	noHostnameMatch = re.match(r"^(\d+\.\d+\.\d+\.\d+\s\(\w{12}\))",hostname)

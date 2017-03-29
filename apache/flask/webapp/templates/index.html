@@ -27,6 +27,7 @@
 					<div class="w3-container">
 						<p><b>IP</b>: {{device['ip']|safe}}</p>
 						<p><b>Vendor</b>: {{device['vendor']|safe}}</p>
+                        <p><b>Firewall</b>: {{device['defaultFwAction']}}</p>
 						<p><b>Open Ports</b>: {{device['openPorts']}}</p>						
 						<p><b>Monitored</b>: {% if device['ignore'] == '0' %}Yes{% else %}No{% endif %}</p>
 					</div>

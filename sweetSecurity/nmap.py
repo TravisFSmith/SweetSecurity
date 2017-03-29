@@ -146,7 +146,7 @@ def portScan():
 		deviceList=[]
 		conn = sqlite3.connect(dbPath)
 		c = conn.cursor()
-		for row in c.execute('SELECT * FROM hosts where active = 1 and ignore = 0'):
+		for row in c.execute('SELECT * FROM hosts where active = 1'):
 			deviceInfo={'ip': row[2], 'mac': row[3]}
 			deviceList.append(deviceInfo)
 		conn.close()

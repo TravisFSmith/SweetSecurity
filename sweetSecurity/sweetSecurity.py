@@ -1,4 +1,4 @@
-import json, os, threading
+import hashlib, json, os, shutil, threading
 import logging.handlers
 from time import sleep
 
@@ -11,6 +11,7 @@ import server
 import pullMaliciousIP
 import pullTorIP
 import healthCheck
+import iptables
 
 #configure sweetSecurity.log
 logger = logs.setup()
@@ -19,6 +20,7 @@ def startGetConfig():
 	while 1:
 		try:
 			serverConfig=json.loads(server.getConfig())
+			iptables.writeHeader()
 			for device in serverConfig['deviceList']:
 				localConfig=sweetSecurityDB.getDeviceSpoofStatus(device['mac'])
 				if str(localConfig[0]) != str(device['ignore']):
@@ -29,6 +31,29 @@ def startGetConfig():
 						logger.info('Start Spoofing %s' % device['mac'])
 						result=sweetSecurityDB.spoof(device['mac'])
 					logger.info(result)
+				for entry in device['firewall']:
+					if entry['destination'] == "*":
+						iptables.addSimple(device['ip'],entry['action'])
+					elif len(entry['destination']) > 0:
+						iptables.addFull(device['ip'],entry['destination'],entry['action'])
+			iptables.writeFooter()
+			if os.path.isfile('/opt/SweetSecurity/iptables_existing.sh'):
+				#Check if it changed to see if we need to apply it or not...
+				existingHash=hashlib.md5(open('/opt/SweetSecurity/iptables_existing.sh','rb').read()).hexdigest()
+				newHash=hashlib.md5(open('/opt/SweetSecurity/iptables_new.sh','rb').read()).hexdigest()
+				if newHash != existingHash:
+					os.remove('/opt/SweetSecurity/iptables_existing.sh')
+					shutil.move('/opt/SweetSecurity/iptables_new.sh','/opt/SweetSecurity/iptables_existing.sh')
+					os.chmod('/opt/SweetSecurity/iptables_existing.sh',755)
+					os.popen('sudo /opt/SweetSecurity/iptables_existing.sh').read()
+					logger.info('applying new firewall config')
+				else:
+					os.remove('/opt/SweetSecurity/iptables_new.sh')
+			else:
+				shutil.move('/opt/SweetSecurity/iptables_new.sh','/opt/SweetSecurity/iptables_existing.sh')
+				os.chmod('/opt/SweetSecurity/iptables_existing.sh',755)
+				os.popen('sudo /opt/SweetSecurity/iptables_existing.sh').read()
+				logger.info('applying new firewall config')
 		except:
 			pass
 		sleep(5)

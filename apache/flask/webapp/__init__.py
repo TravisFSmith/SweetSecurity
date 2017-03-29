@@ -4,6 +4,7 @@ from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf.csrf import CSRFError
 csrf = CSRFProtect()
+
 from elasticsearch import Elasticsearch
 from time import sleep
 import json
@@ -26,12 +27,15 @@ def create_app():
     esService = Elasticsearch()
     mail = Mail(app)
     try:
-        recipient=app.config['MAIL_USERNAME']
+        #recipient=app.config['MAIL_USERNAME']
+	recipient='traviss@gmail.com'
     except:
         recipient=None
+
+
     csrf.init_app(app)
 
-    #Used to get the CSRF for client scripts
+
     @app.route('/csrf')
     def getCsrfToken():
         return render_template('csrf.html')
@@ -57,6 +61,7 @@ def create_app():
                         'mac': host['_source']['mac'],
                         'vendor': host['_source']['vendor'],
                         'ignore': str(host['_source']['ignore']),
+                        'defaultFwAction': host['_source']['defaultFwAction'],
                         'firstSeen': host['_source']['firstSeen'],
                         'lastSeen': host['_source']['lastSeen'],
                         'openPorts': portCount}
@@ -105,6 +110,7 @@ def create_app():
                     'mac': mac,
                     'vendor': vendor,
                     'ignore': ignored,
+                    'defaultFwAction': 'ACCEPT',
                     'firstSeen': str(int(round(time.time() * 1000))),
                     'lastSeen': str(int(round(time.time() * 1000)))}
         deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
@@ -141,6 +147,7 @@ def create_app():
 
     @app.route('/renameDevice', methods=['POST'])
     def renameDevice():
+        
         mac=''
         nickName=''
         f = request.form
@@ -158,6 +165,7 @@ def create_app():
             return redirect('/')
         deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
         deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
+        #deviceInfo = query_db('SELECT * FROM hosts where mac = ?',[mac],one=True)
         if deviceInfo is None:
             flash(u'Error renaming device, unknown device', 'error')
             return redirect('/')
@@ -286,6 +294,7 @@ def create_app():
         elif len(deviceInfo['hits']['hits']) == 1:
             for host in deviceInfo['hits']['hits']:
                 portList=[]
+                fwList=[]
                 firstSeen = float(host['_source']['firstSeen']) / 1000.0
                 lastSeen = float(host['_source']['lastSeen']) / 1000.0
                 deviceInfo={'hostname': host['_source']['hostname'],
@@ -294,15 +303,41 @@ def create_app():
                         'mac': host['_source']['mac'],
                         'vendor': host['_source']['vendor'],
                         'ignore': str(host['_source']['ignore']),
+                        'defaultFwAction': host['_source']['defaultFwAction'],
                         'firstSeen': datetime.datetime.fromtimestamp(firstSeen).strftime('%Y-%m-%d %H:%M:%S'),
                         'lastSeen': datetime.datetime.fromtimestamp(lastSeen).strftime('%Y-%m-%d %H:%M:%S')}
+                
                 portCountQuery = {"sort":[{ "port" : {"order" : "asc"}}],"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
+                #portCountQuery = {"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
                 portInfo=es.search(esService, portCountQuery, 'sweet_security', 'ports')
                 if portInfo is not None:
                     for port in portInfo['hits']['hits']:
                         portList.append(port['_source'])
                 deviceInfo['portList']=portList
-            return render_template('device.html', deviceInfo=deviceInfo)
+                fwQuery = {"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
+                fwData=es.search(esService, fwQuery, 'sweet_security', 'firewallProfiles')
+                if  fwData is not None:
+                    for entry in fwData['hits']['hits']:
+                        fwList.append(entry['_source'])
+                deviceInfo['fwList']=fwList
+                
+                blockedIPs=[]
+                blockedTrafficQuery = {"query":{"bool":{"must":[{"match":{"srcIP": host['_source']['ip4'] }},{ "match": { "path": "/var/log/kern.log" }}]}}}
+                blockedTraffic=es.search(esService,blockedTrafficQuery,'logstash-*','logs')
+                if blockedTraffic is not None:
+                    for blockedPacket in blockedTraffic['hits']['hits']:
+                        if blockedPacket['_source']['dstIP'] not in blockedIPs:
+                            sslHosts=[]
+                            sslQuery={"query":{"bool":{"must":[{"match":{"resp_h": blockedPacket['_source']['dstIP'] }},{ "match": { "path": "/opt/nsm/bro/logs/current/ssl.log" }}]}}}
+                            sslInfo=es.search(esService,sslQuery,'logstash-*','logs',10000)
+                            if sslInfo is not None:
+                                for sslHit in sslInfo['hits']['hits']:
+                                    if sslHit['_source']['path'] == '/opt/nsm/bro/logs/current/ssl.log':
+                                        if sslHit['_source']['server_name'] not in sslHosts and sslHit['_source']['server_name'] != '-':
+                                            sslHosts.append(sslHit['_source']['server_name'])
+                            info={'ip': blockedPacket['_source']['dstIP'], 'urls': sslHosts}
+                            blockedIPs.append(info)
+            return render_template('device.html', deviceInfo=deviceInfo, blockedIPs=blockedIPs)
         else:
             #This happens when the web component is still booting up and the ES index hasn't initialized
             #Sometimes we get two devices, we'll delete the old one and let the sensor send info on it's next update
@@ -310,6 +345,105 @@ def create_app():
             #sleep for one second, otherwise ES doesn't have enough time to delete the duplicated record
             sleep(1)
             return redirect('/device/%s' % mac)
+
+    @app.route('/updateFW', methods=['POST'])
+    def updateFW():
+        mac=''
+        fwDest=''
+        fwAction=''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "macAddress":
+                    mac=request.form['macAddress']
+                    mac=validators.convertMac(mac)
+                if key == "destination":
+                    fwDest=request.form['destination']
+                if key == "action":
+                    fwAction=request.form['action']
+        if not validators.macAddress(mac):
+            print "invalid mac"
+            return redirect('/')
+        if not validators.url(fwDest):
+            #If it's *, then we'll update the defaultFwAction for the device, bypass validation
+            if fwDest != "*":
+                print "invalid destination"
+                return redirect('/')
+        if len(fwAction) == 0:
+            print "invalid action, no action given"
+            return redirect('/')
+        if fwAction == "true":
+            fwAction="ACCEPT"
+        elif fwAction == "false":
+            fwAction="DROP"
+        else:
+            print "unknown action"
+            return redirect('/')
+        if fwDest == '*':
+            
+            deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
+            deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
+            if deviceInfo is None:
+                flash(u'Unknown device', 'error')
+                return redirect('/')
+            elif len(deviceInfo['hits']['hits']) == 0:
+                flash(u'Unknown device', 'error')
+                return redirect('/')
+            elif len(deviceInfo['hits']['hits']) == 1:
+                for hit in deviceInfo['hits']['hits']:
+                    body = {'doc' : {'defaultFwAction': fwAction}}
+                    es.update(esService, body, 'sweet_security', 'devices', hit['_id'])
+                #Have to delay the response so the refreshed page shows the new name
+                sleep(1)
+                flash(u'Device updated', 'success')
+                return redirect('/')
+            else:
+                es.consolidate(mac,esService)
+                sleep(1)
+                deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
+                for hit in deviceInfo['hits']['hits']:
+                    body = {'doc' : {'defaultFwAction': fwAction}}
+                    es.update(esService, body, 'sweet_security', 'devices', hit['_id'])
+                #Have to delay the response so the refreshed page shows the new name
+                sleep(1)
+                flash(u'Device updated', 'success')
+            
+        else:
+            fwData={'mac': mac,
+                    'destination': fwDest,
+                    'action': fwAction}
+            fwQuery={"query":{"bool":{"must":[{"match":{"mac": mac }},{ "match": { "destination": fwDest }}]}}}
+            exists=es.search(esService,fwQuery,'sweet_security','firewallProfiles')
+            if len(exists['hits']['hits']) == 0:
+                es.write(esService, fwData, 'sweet_security', 'firewallProfiles')
+                sleep(1)
+        return "true"
+
+    @app.route('/deleteFW', methods=['POST'])
+    def deleteFW():
+        mac=''
+        fwDest=''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "macAddress":
+                    mac=request.form['macAddress']
+                    mac=validators.convertMac(mac)
+                if key == "destination":
+                    fwDest=request.form['destination']
+        if not validators.macAddress(mac):
+            print "invalid mac"
+            return redirect('/')
+        if not validators.url(fwDest):
+            print "invalid destination"
+            return redirect('/')
+        fwQuery={"query":{"bool":{"must":[{"match":{"mac": mac }},{ "match": { "destination": fwDest }}]}}}
+        exists=es.search(esService,fwQuery,'sweet_security','firewallProfiles')
+        if len(exists['hits']['hits']) > 0:
+            es.delete(esService, 'sweet_security', 'firewallProfiles', exists['hits']['hits'][0]['_id'])
+            sleep(1)
+        return "true"
+
 
     @app.route('/addPort', methods=['POST'])
     def addPort():
@@ -391,7 +525,6 @@ def create_app():
             return jsonify(status='success',reason='port information updated')
         else:
             return jsonify(status='error',reason='duplicate ports found')
-        
         return jsonify(status='error', reason="you should not be here")
 
     @app.route('/getConfig', methods=['GET','POST'])
@@ -402,17 +535,29 @@ def create_app():
         allDevices=es.search(esService, matchAll, 'sweet_security', 'devices')
         if allDevices is not None:
             for host in allDevices['hits']['hits']:
+                fwQuery = {"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
+                fwData=es.search(esService, fwQuery, 'sweet_security', 'firewallProfiles')
+                fwList=[]
+                if len(fwData['hits']['hits']) > 0:
+                    for entry in fwData['hits']['hits']:
+                        fwInfo={'action': entry['_source']['action'],'destination': entry['_source']['destination']}
+                        fwList.append(fwInfo)
+                if host['_source']['defaultFwAction'] == 'ACCEPT':
+                    fwInfo={'action': 'ACCEPT','destination': '*'}
+                else:
+                    fwInfo={'action': 'DROP','destination': '*'}
+                fwList.append(fwInfo)
                 deviceInfo={'hostname': host['_source']['hostname'],
                         'nickname': host['_source']['nickname'],
                         'ip': host['_source']['ip4'],
                         'mac': host['_source']['mac'],
                         'vendor': host['_source']['vendor'],
                         'ignore': str(host['_source']['ignore']),
+                        'firewall': fwList,
                         'firstSeen': host['_source']['firstSeen'],
                         'lastSeen': host['_source']['lastSeen']}
                 deviceList.append(deviceInfo)
         return jsonify(deviceList=deviceList)
-
 
     @app.route('/settings')
     def settings():
@@ -426,7 +571,15 @@ def create_app():
                     elasticHealth='Started'
                 else:
                     elasticHealth='Stopped'
-
+        
+        if os.path.isfile('/usr/share/logstash/bin/logstash'):
+            logstashHealth=os.popen('service logstash status').read()
+            for line in logstashHealth.splitlines():
+                if line.lstrip().startswith('Active: '):
+                    if line.lstrip().startswith('Active: active (running)'):
+                        logstashHealth='Started'
+                    else:
+                        logstashHealth='Stopped'
         else:
             logstashHealth='not available'
         kibanaHealth=os.popen('service kibana status').read()
@@ -437,16 +590,6 @@ def create_app():
                 else:
                     kibanaHealth='Stopped'
 
-        #Place holder if we want to use this in a later release. 
-        #Need to add commands to sudoers command for www-data
-        if os.path.isfile('/usr/share/logstash/bin/logstash'):
-            logstashHealth=os.popen('service logstash status').read()
-            for line in logstashHealth.splitlines():
-                if line.lstrip().startswith('Active: '):
-                    if line.lstrip().startswith('Active: active (running)'):
-                        logstashHealth='Started'
-                    else:
-                        logstashHealth='Stopped'
         if os.path.isfile('/opt/nsm/bro/bin/broctl'):
             broStatus='stopped'
             broHealth=os.popen('sudo /opt/nsm/bro/bin/broctl status').read()
@@ -457,6 +600,7 @@ def create_app():
                 broLine+=1
         else:
             broStatus="not available"
+
         if os.path.isfile('/opt/SweetSecurity/sweetSecurity.py'):
             ssHealth=os.popen('service sweetsecurity status').read()
             for line in ssHealth.splitlines():
@@ -523,19 +667,18 @@ def create_app():
                     memInstalled=memUsageData['hits']['hits'][0]['_source']['memAvailable']
                     memConsumed=memUsageData['hits']['hits'][0]['_source']['memConsumed']
                     memPercent=memUsageData['hits']['hits'][0]['_source']['memPercentUsed']
-                 
                 time=datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%fZ')
                 timeSince=datetime.datetime.now()-time
                 systemInfo={
-                    'time': time,
-                    'timeSince': int(timeSince.seconds / 60.0),
-                    'sensorName': sensor['key'],
-                    'logstash': logstashStatus,
-                    'broStatus': broStatus,
-                    'diskUsage': int(sensorDiskUsage),
-                    'memInstalled': int(memInstalled),
-                    'memConsumed': int(memConsumed),
-                    'memPercent': int(memPercent)
+                'time': time,
+                'timeSince': int(timeSince.seconds / 60.0),
+                'sensorName': sensor['key'],
+                'logstash': logstashStatus,
+                'broStatus': broStatus,
+                'diskUsage': int(sensorDiskUsage),
+                'memInstalled': int(memInstalled),
+                'memConsumed': int(memConsumed),
+                'memPercent': int(memPercent)
                 }
                 sensorInfo.append(systemInfo)
         
@@ -572,6 +715,7 @@ def create_app():
                 return "unknown action"
         return "unknown service"
 
+
     @app.route('/deleteSensor', methods=['POST'])
     def deleteSensor():
         sensorName=''
@@ -581,17 +725,21 @@ def create_app():
                 if key == "sensorName":
                      sensorName=request.form['sensorName']
         if len(sensorName)==0:
+            print "unknown sensor"
             flash(u'Unknown Sensor Name', 'error')
             return redirect('/settings')
         sensorInfo = []
         sensorQuery = {"query": {"bool": {"must": [{"exists": {"field": "logstashHealth"}}, {"match": {"host": sensorName}}]}}}
         sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs')
         docCount = sensorHostData['hits']['total']
+        print docCount
         sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs', docCount)
         for sensor in sensorHostData['hits']['hits']:
             es.delete(esService, sensor['_index'], 'logs', sensor['_id'])
         flash(u'Sensor Deleted')
         return redirect('/settings')
+
+
 
     @app.route('/consolidateDevices')
     def consolidateDevices():
@@ -604,6 +752,7 @@ def create_app():
         return redirect('/settings')
 
     @app.errorhandler(CSRFError)
+    #@csrf.error_handler
     def csrf_error(reason):
         return jsonify(reason=reason)
 

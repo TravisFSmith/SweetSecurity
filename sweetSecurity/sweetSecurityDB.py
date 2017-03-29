@@ -91,6 +91,19 @@ def getDeviceSpoofStatus(mac):
 	conn.close()
 	return exists
 
+def changeCert(type):
+	conn = sqlite3.connect(dbPath)
+	c = conn.cursor()
+	if type=='production':
+		c.execute("UPDATE configuration SET value = 'production' where object = 'webCert'")
+	elif type == 'development':
+		c.execute("UPDATE configuration SET value = 'development' where object = 'webCert'")
+	else:
+		return None
+	conn.commit()
+	conn.close()
+	return "Updated cert type to %s" % type
+
 if __name__=="__main__":
 	action=str(sys.argv[1])
 	#python db.py create
@@ -112,5 +125,14 @@ if __name__=="__main__":
 			sys.exit('Need to supply a MAC address')
 		mac=str(sys.argv[2])
 		spoof(mac)
+	elif (action=="cert"):
+		if len(sys.argv) == 2:
+			sys.exit('Need to state development or production')
+		if sys.argv[2].lower() == 'production':
+			print changeCert('production')
+		elif sys.argv[2].lower() == 'development':
+			print changeCert('development')
+		else:
+			sys.exit('Unknown cert type, must be development or production')
 	else:
 		print("The only supported actions are create, show, showSpoofed, spoof, and ignore...")
