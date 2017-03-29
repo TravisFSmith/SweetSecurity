@@ -13,6 +13,8 @@ def install(csKey):
 	print "  Downloading Critical Stack Agent"
 	if cpuArch == 'x86':
 		os.popen('sudo wget http://intel.criticalstack.com/client/critical-stack-intel-i386.deb 2>&1').read()
+		if not os.path.isfile('critical-stack-intel-i386.deb'):
+			sys.exit('Error downloading critical stack agent')
 		print "  Installing Critical Stack Agent"
 		os.popen('sudo dpkg -i critical-stack-intel-i386.deb').read()
 		print "  Applying Critical Stack API Key"
@@ -21,6 +23,8 @@ def install(csKey):
 		os.remove('critical-stack-intel-i386.deb')
 	elif cpuArch == 'x86_64':
 		os.popen('sudo wget http://intel.criticalstack.com/client/critical-stack-intel-amd64.deb 2>&1').read()
+		if not os.path.isfile('critical-stack-intel-amd64.deb'):
+			sys.exit('Error downloading critical stack agent')
 		print "  Installing Critical Stack Agent"
 		os.popen('sudo dpkg -i critical-stack-intel-amd64.deb').read()
 		print "  Applying Critical Stack API Key"
@@ -29,6 +33,8 @@ def install(csKey):
 		os.remove('critical-stack-intel-amd64.deb')
 	else:
 		os.popen('sudo wget http://intel.criticalstack.com/client/critical-stack-intel-arm.deb 2>&1').read()
+		if not os.path.isfile('critical-stack-intel-arm.deb'):
+			sys.exit('Error downloading critical stack agent')
 		print "  Installing Critical Stack Agent"
 		os.popen('sudo dpkg -i critical-stack-intel-arm.deb').read()
 		print "  Applying Critical Stack API Key"

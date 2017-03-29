@@ -1,4 +1,4 @@
-import json, os, shutil
+import json, os, shutil, sys
 from time import sleep
 
 def install():
@@ -25,6 +25,8 @@ def install():
 		print "Installing Elasticsearch"
 		print "  Downloading Elasticsearch 5.2.2"
 		os.popen('sudo wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.2.2.deb 2>&1').read()
+		if not os.path.isfile('elasticsearch-5.2.2.deb'):
+			sys.exit('Error downloading elasticsearch')
 		print "  Installing Elasticsearch"
 		os.popen('sudo dpkg -i elasticsearch-5.2.2.deb').read()
 		print "  Cleaning Up Installation Files"
@@ -60,5 +62,3 @@ def install():
 			sleep(10)
 	else:
 		print "Elasticsearch already installed"
-	print "  Installing pip package - elasticsearch"
-	os.popen('sudo pip install elasticearch').read()

@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, sys
 
 
 def install(chosenInterfaceIP):
@@ -18,6 +18,8 @@ def install(chosenInterfaceIP):
 		print "  Downloading Kibana 5.2.2"
 		if cpuArch == 'x86_64':
 			os.popen('sudo wget https://artifacts.elastic.co/downloads/kibana/kibana-5.2.2-linux-x86_64.tar.gz 2>&1').read()
+			if not os.path.isfile('kibana-5.2.2-linux-x86_64.tar.gz'):
+				sys.exit('Error downloading Kibana')
 			print "  Installing Kibana"
 			os.popen('sudo tar -xzf kibana-5.2.2-linux-x86_64.tar.gz').read()
 			shutil.copytree('kibana-5.2.2-linux-x86_64/','/opt/kibana')
@@ -26,6 +28,8 @@ def install(chosenInterfaceIP):
 			shutil.rmtree("kibana-5.2.2-linux-x86_64/")
 		else:
 			os.popen('sudo wget https://artifacts.elastic.co/downloads/kibana/kibana-5.2.2-linux-x86.tar.gz 2>&1').read()
+			if not os.path.isfile('kibana-5.2.2-linux-x86.tar.gz'):
+				sys.exit('Error downloading Kibana')
 			print "  Installing Kibana"
 			os.popen('sudo tar -xzf kibana-5.2.2-linux-x86.tar.gz').read()
 			shutil.copytree('kibana-5.2.2-linux-x86/','/opt/kibana')

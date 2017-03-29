@@ -64,6 +64,8 @@ def install(esServer,esUser,esPass):
 			smtpPass = getpass.getpass("    \033[1mEnter Email Password (ex: P@55word)\033[0m: ")
 		print "  Downloading Logstash 5.2.2"
 		os.popen('sudo wget https://artifacts.elastic.co/downloads/logstash/logstash-5.2.2.deb 2>&1').read()
+		if not os.path.isfile('logstash-5.2.2.deb'):
+			sys.exit('Error downloading logstash')
 		print "  Installing Logstash"
 		os.popen('sudo dpkg -i logstash-5.2.2.deb').read()
 		print "  Cleaning Up Logstash Installation Files"

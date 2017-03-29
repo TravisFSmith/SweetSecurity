@@ -7,6 +7,7 @@ def get_user_input(input_string):
 		return raw_input(input_string)
 
 def install(installType,chosenInterface,chosenIP):
+	print "Creating Website"
 	#Copy Website Stuff
 	if not os.path.exists('/var/www/webapp'):
 		os.makedirs('/var/www/webapp')
