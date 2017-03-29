@@ -14,10 +14,6 @@ from install import sweetSecurity
 from install import apache
 
 #Issue: When using OpenDNS, no hostname resolution
-#TODO: build kibana searches/visualizations/dashboards
-#TODO: build kibana stuff for sweet_security index too
-#TODO: Can we implement network isolation?
-#TODO: intelligent firewall service in the cloud
 
 class color:
    PURPLE = '\033[95m'

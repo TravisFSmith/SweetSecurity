@@ -70,27 +70,29 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-								<div class="panel-heading">Firewall Config</div>
-								<div class="panel-body">
-									<div class="row" style="border-bottom: 2px solid #000;">
-										<div class="col-xs-4"><b>Destination</b></div>
-										<div class="col-xs-4"><b>Action</b></div>
-										<div class="col-xs-4">&nbsp;</div>
-									</div>
+								<div class="panel-heading">Firewall Config<a data-toggle="collapse" href="#firewallPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+								<div id="firewallPanel" class="panel-collapse collapse">
+									<div class="panel-body">
+										<div class="row" style="border-bottom: 2px solid #000;">
+											<div class="col-xs-4"><b>Destination</b></div>
+											<div class="col-xs-4"><b>Action</b></div>
+											<div class="col-xs-4">&nbsp;</div>
+										</div>
 {% for entry in deviceInfo['fwList'] %}
-									<div class="row" style="border-bottom: 1px solid #ccc;">
-										<div class="col-xs-4">{{entry['destination']}}</div>
-										<div class="col-xs-4">{{entry['action']}}</div>
-										<div class="col-xs-4"><button type="button" class="btn btn-danger btn-sm" onclick="deleteFW('{{entry['destination']}}')">Delete</button></div>
-									</div>
+										<div class="row" style="border-bottom: 1px solid #ccc;">
+											<div class="col-xs-4">{{entry['destination']}}</div>
+											<div class="col-xs-4">{{entry['action']}}</div>
+											<div class="col-xs-4"><button type="button" class="btn btn-danger btn-sm" onclick="deleteFW('{{entry['destination']}}')">Delete</button></div>
+										</div>
 {% endfor %}
-									<div class="row" style="border-bottom: 1px solid #ccc;">
-										<div class="col-xs-4">All</div>
-										<div class="col-xs-4">{{deviceInfo['defaultFwAction']}}</div>
-										<div class="col-xs-4"><button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#updateDefaultFwModal">Edit</button></div>
+										<div class="row" style="border-bottom: 1px solid #ccc;">
+											<div class="col-xs-4">All</div>
+											<div class="col-xs-4">{{deviceInfo['defaultFwAction']}}</div>
+											<div class="col-xs-4"><button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#updateDefaultFwModal">Edit</button></div>
+										</div>
+										<br />
+										<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addFwModal">Add Firewall Entry</button>
 									</div>
-									<br />
-									<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addFwModal">Add Firewall Entry</button>
 								</div>
 							</div>
 						</div>
@@ -98,18 +100,20 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-								<div class="panel-heading">Blocked Traffic</div>
-								<div class="panel-body">
-									<div class="row" style="border-bottom: 2px solid #000;">
-										<div class="col-xs-3"><b>IP Address</b></div>
-										<div class="col-xs-9"><b>Known URLs</b></div>
-									</div>
+							<div class="panel-heading">Blocked Traffic<a data-toggle="collapse" href="#blockedTrafficPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+								<div id="blockedTrafficPanel" class="panel-collapse collapse">
+									<div class="panel-body">
+										<div class="row" style="border-bottom: 2px solid #000;">
+											<div class="col-xs-3"><b>IP Address</b></div>
+											<div class="col-xs-9"><b>Known URLs</b></div>
+										</div>
 {% for ip in blockedIPs %}
-									<div class="row" style="border-bottom: 2px solid #000;">
-										<div class="col-xs-3">{{ip['ip']}}</div>
-										<div class="col-xs-9">{% for url in ip['urls']%}{{url}}<br/>{%endfor%}</div>
-									</div>
+										<div class="row" style="border-bottom: 2px solid #000;">
+											<div class="col-xs-3">{{ip['ip']}}</div>
+											<div class="col-xs-9">{% for url in ip['urls']%}{{url}}<br/>{%endfor%}</div>
+										</div>
 {% endfor %}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -118,24 +122,26 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-								<div class="panel-heading">Open Ports</div>
-								<div class="panel-body">
-									<div class="row" style="border-bottom: 2px solid #000;">
-										<div class="col-xs-2"><b>Port</b></div>
-										<div class="col-xs-2"><b>Protocol</b></div>
-										<div class="col-xs-2"><b>Name</b></div>
-										<div class="col-xs-4"><b>Product</b></div>
-										<div class="col-xs-2"><b>Version</b></div>
-									</div>
+								<div class="panel-heading">Open Ports<a data-toggle="collapse" href="#portPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+									<div id="portPanel" class="panel-collapse collapse">
+									<div class="panel-body">
+										<div class="row" style="border-bottom: 2px solid #000;">
+											<div class="col-xs-2"><b>Port</b></div>
+											<div class="col-xs-2"><b>Protocol</b></div>
+											<div class="col-xs-2"><b>Name</b></div>
+											<div class="col-xs-4"><b>Product</b></div>
+											<div class="col-xs-2"><b>Version</b></div>
+										</div>
 {% for port in deviceInfo['portList'] %}
-									<div class="row" style="border-bottom: 1px solid #ccc;">
-										<div class="col-xs-2">{{ port['port'] }}</div>
-										<div class="col-xs-2">{{ port['protocol'] }}</div>
-										<div class="col-xs-2">{{ port['name'] }}</div>
-										<div class="col-xs-4">{{ port['product'] }}</div>
-										<div class="col-xs-2">{{ port['version'] }}</div>
-									</div>
+										<div class="row" style="border-bottom: 1px solid #ccc;">
+											<div class="col-xs-2">{{ port['port'] }}</div>
+											<div class="col-xs-2">{{ port['protocol'] }}</div>
+											<div class="col-xs-2">{{ port['name'] }}</div>
+											<div class="col-xs-4">{{ port['product'] }}</div>
+											<div class="col-xs-2">{{ port['version'] }}</div>
+										</div>
 {% endfor %}
+									</div>
 								</div>
 							</div>
 						</div>
