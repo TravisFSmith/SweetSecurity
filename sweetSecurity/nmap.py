@@ -56,8 +56,8 @@ def pingSweep():
 		dfgw=getSystemDfgw()
 	webAddress=sweetSecurityDB.getWebAddress()
 	logger.info('Beginning Ping Sweep')
-	os.popen("sudo nmap -sn %s/%s -e %s -oX nmap.xml" % (ip,str(netmask),device)).read()
-	file='nmap.xml'
+	os.popen("sudo nmap -sn %s/%s -e %s -oX /opt/SweetSecurity/nmap.xml" % (ip,str(netmask),device)).read()
+	file='/opt/SweetSecurity/nmap.xml'
 	try:
 		tree = ET.parse(file)
 		root = tree.getroot()
@@ -154,8 +154,8 @@ def portScan():
 		logger.info("SQL Query Error: %s",str(e))
 	for device in deviceList:
 		logger.info("Port scanning %s",device['ip'])
-		os.popen("nmap -sV -oX portScan.xml %s" % device['ip']).read()
-		file='portScan.xml'
+		os.popen("nmap -sV -oX /opt/SweetSecurity/portScan.xml %s" % device['ip']).read()
+		file='/opt/SweetSecurity/portScan.xml'
 		try:
 			tree = ET.parse(file)
 			root = tree.getroot()
