@@ -27,8 +27,7 @@ def create_app():
     esService = Elasticsearch()
     mail = Mail(app)
     try:
-        #recipient=app.config['MAIL_USERNAME']
-	recipient='traviss@gmail.com'
+        recipient=app.config['MAIL_USERNAME']
     except:
         recipient=None
 
