@@ -82,6 +82,7 @@ def install(esServer,esUser,esPass):
 			os.makedirs('/etc/logstash/custom_patterns')
 		shutil.copyfile('logstash/rules/bro.rule', '/etc/logstash/custom_patterns/bro.rule')
 		shutil.copyfile('logstash/rules/sweetSecurity.rule', '/etc/logstash/custom_patterns/sweetSecurity.rule')
+		shutil.copyfile('logstash/rules/iptables.rule', '/etc/logstash/custom_patterns/iptables.rule')
 		if not os.path.exists('/etc/logstash/translate'):
 			os.makedirs('/etc/logstash/translate')
 		shutil.copyfile('logstash/translate/torIP.yaml', '/etc/logstash/translate/torIP.yaml')
