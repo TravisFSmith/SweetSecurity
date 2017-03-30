@@ -33,7 +33,7 @@ def install(installType):
 		if cpuArch.startswith('x86'):
 			os.popen('sudo apt-get -y install curl cmake g++ flex bison libpcap-dev libssl-dev python-dev python-pip python-scapy swig nmap tcpdump 2>&1').read()
 		else:
-			os.popen('sudo apt-get -y install cmake flex bison libpcap-dev libssl-dev python-dev python-pip python-scapy swig oracle-java8-jdk ant zip git nmap tcpdump 2>&1').read()
+			os.popen('sudo apt-get -y install cmake flex bison libpcap-dev libssl-dev python-dev python-pip python-scapy swig oracle-java8-jdk ant zip git nmap tcpdump texinfo 2>&1').read()
 		os.popen('sudo pip install requests 2>&1').read()
 	elif installType=='3':
 		#Web Server Install
