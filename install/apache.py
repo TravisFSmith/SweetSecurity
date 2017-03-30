@@ -7,6 +7,7 @@ def get_user_input(input_string):
 		return raw_input(input_string)
 
 def install(installType,chosenInterface,chosenIP):
+	cpuArch = os.uname()[4]
 	print "Creating Website"
 	#Copy Website Stuff
 	if not os.path.exists('/var/www/webapp'):
@@ -34,8 +35,11 @@ def install(installType,chosenInterface,chosenIP):
 	#Using instructions from https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04
 	print "  Configuring SSL"
 	os.popen('sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US/ST=OR/L=Portland" -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt').read()
-	os.popen('sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048').read()
-	shutil.copyfile('apache/conf/ssl-params.conf','/etc/apache2/conf-available/ssl-params.conf')
+	if cpuArch.startswith('x86'):
+		os.popen('sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048').read()
+		shutil.copyfile('apache/conf/ssl-params.conf','/etc/apache2/conf-available/ssl-params.conf')
+	else:
+		shutil.copyfile('apache/conf/ssl-params-raspbian.conf', '/etc/apache2/conf-available/ssl-params.conf')
 	os.popen('sudo a2enmod ssl').read()
 	os.popen('sudo a2enmod headers').read()
 	os.popen('sudo a2ensite default-ssl').read()

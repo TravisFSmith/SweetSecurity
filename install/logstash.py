@@ -33,16 +33,6 @@ def install(esServer,esUser,esPass):
 		else:
 			sleep(10)
 	
-	#response=os.popen("curl -XGET '%s:9200'" % esServer).read()
-	#try:
-	#	jsonStuff=json.loads(response)
-	#	if jsonStuff['tagline'] == "You Know, for Search":
-	#		print "Connected to Elasticsearch"
-	#	else:
-	#		sys.exit('Unable to reach Elasticsearch Server at %s. Re-run installation after confirming Elasticsearch is running' % esServer)
-	#except:
-	#	sys.exit('Unable to reach Elasticsearch Server at %s. Re-run installation after confirming Elasticsearch is running' % esServer)
-	
 	#Install Logstash
 	logstashInstalled=False
 	if os.path.isfile('/usr/share/logstash/bin/logstash'):
