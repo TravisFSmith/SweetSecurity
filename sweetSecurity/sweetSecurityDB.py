@@ -104,6 +104,15 @@ def changeCert(type):
 	conn.close()
 	return "Updated cert type to %s" % type
 
+def changeInterface(interfaceName):
+	t = (interfaceName,)
+	conn = sqlite3.connect(dbPath)
+	c = conn.cursor()
+	c.execute("UPDATE configuration SET value = ? where object = 'interface'", t)
+	conn.commit()
+	conn.close()
+	return "Updated interface to %s" % interfaceName
+
 if __name__=="__main__":
 	action=str(sys.argv[1])
 	#python db.py create
@@ -134,5 +143,9 @@ if __name__=="__main__":
 			print changeCert('development')
 		else:
 			sys.exit('Unknown cert type, must be development or production')
+	elif (action=='interface'):
+		if len(sys.argv) == 2:
+			sys.exit('Must supply an interface name')
+		print changeInterface(sys.argv[2])
 	else:
 		print("The only supported actions are create, show, showSpoofed, spoof, and ignore...")
