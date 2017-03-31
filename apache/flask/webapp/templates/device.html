@@ -109,7 +109,7 @@
 										</div>
 {% for ip in blockedIPs %}
 										<div class="row" style="border-bottom: 2px solid #000;">
-											<div class="col-xs-3">{{ip['ip']}}</div>
+											<div class="col-xs-3"><span class="glyphicon glyphicon-plus-sign" style="cursor: pointer; color:green"  onclick="addFWRule('{{ip['ip']}}')"></span>&nbsp;{{ip['ip']}}</div>
 											<div class="col-xs-9">{% for url in ip['urls']%}{{url}}<br/>{%endfor%}</div>
 										</div>
 {% endfor %}
@@ -321,6 +321,20 @@ function updateDefaultFW() {
         'macAddress': '{{deviceInfo['mac']}}',
         'destination': '*',
         'action': document.getElementById("defaultaction").checked,
+        'csrf_token': '{{ csrf_token() }}'
+      },
+      function (response, status) {
+          window.location.reload();
+      }
+    );
+}
+
+function addFWRule(destination) {
+  $.post('/updateFW',
+      {
+        'macAddress': '{{deviceInfo['mac']}}',
+        'destination': destination,
+        'action': 'true',
         'csrf_token': '{{ csrf_token() }}'
       },
       function (response, status) {
