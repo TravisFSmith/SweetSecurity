@@ -6,3 +6,4 @@ ssLogstashHealthLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sLogstash\sHealth=\
 ssBroHealthLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sBro\sHealth\s=\s\"(?<broHealth>[^\"]+)\".*
 ssDiskUsageLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sDisk\sPercentage\sAvailable\:\s(?<diskUsage>\d+).*
 ssMemUsageLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sMemory Available\s=\s\"(?<memAvailable>\d+)\",\sMemory\sConsumed\s\=\s\"(?<memConsumed>\d+)\"\,\sPercent\sUsed\s\=\s\"(?<memPercentUsed>\d+)\".*
+ssPortScanLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\s(?<action>Port\sscanning)\s(?<ipAddress>.*)

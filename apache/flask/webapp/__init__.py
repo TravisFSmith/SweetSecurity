@@ -315,6 +315,18 @@ def create_app():
                     for port in portInfo['hits']['hits']:
                         portList.append(port['_source'])
                 deviceInfo['portList']=portList
+
+                lastPortScanQuery = {"sort": [{"@timestamp": {"order": "desc"}}], "query": {"bool": { "must": [{"match": {"ipAddress": host['_source']['ip4']}}, {"match": {"action": "Port scanning"}}]}}}
+                lastPortScanInfo = es.search(esService, lastPortScanQuery, 'logstash-*', 'logs', 1)
+                if lastPortScanInfo is not None:
+                    if len(lastPortScanInfo['hits']['hits']) > 0:
+                        lastPortScan = lastPortScanInfo['hits']['hits'][0]['_source']['@timestamp']
+                    else:
+                        lastPortScan = 'Device has not been port scanned'
+                else:
+                    lastPortScan = 'Device has not been port scanned'
+                deviceInfo['lastPortScan'] = lastPortScan
+
                 fwQuery = {"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
                 fwData=es.search(esService, fwQuery, 'sweet_security', 'firewallProfiles')
                 if  fwData is not None:
