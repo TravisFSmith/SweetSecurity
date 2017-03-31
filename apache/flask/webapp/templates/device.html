@@ -70,7 +70,7 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-								<div class="panel-heading">Firewall Config<a data-toggle="collapse" href="#firewallPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+								<div class="panel-heading">Firewall Config ({{deviceInfo['fwList']|length}})<a data-toggle="collapse" href="#firewallPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
 								<div id="firewallPanel" class="panel-collapse collapse">
 									<div class="panel-body">
 										<div class="row" style="border-bottom: 2px solid #000;">
@@ -100,7 +100,7 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-							<div class="panel-heading">Blocked Traffic<a data-toggle="collapse" href="#blockedTrafficPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+							<div class="panel-heading">Blocked Traffic ({{blockedIPs|length}})<a data-toggle="collapse" href="#blockedTrafficPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
 								<div id="blockedTrafficPanel" class="panel-collapse collapse">
 									<div class="panel-body">
 										<div class="row" style="border-bottom: 2px solid #000;">
@@ -122,7 +122,7 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-								<div class="panel-heading">Open Ports<a data-toggle="collapse" href="#portPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+								<div class="panel-heading">Open Ports ({{deviceInfo['portList']|length}})<a data-toggle="collapse" href="#portPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
 									<div id="portPanel" class="panel-collapse collapse">
 									<div class="panel-body">
 										<div class="row" style="border-bottom: 2px solid #000;">
