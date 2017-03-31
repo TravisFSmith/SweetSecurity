@@ -313,7 +313,11 @@ def create_app():
                 portInfo=es.search(esService, portCountQuery, 'sweet_security', 'ports')
                 if portInfo is not None:
                     for port in portInfo['hits']['hits']:
-                        portList.append(port['_source'])
+                        portInfoTmp = port['_source']
+                        time = datetime.datetime.fromtimestamp(float(port['_source']['lastSeen']) / 1000.)
+                        time = time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                        portInfoTmp['lastSeen'] = time
+                        portList.append(portInfoTmp)
                 deviceInfo['portList']=portList
 
                 lastPortScanQuery = {"sort": [{"@timestamp": {"order": "desc"}}], "query": {"bool": { "must": [{"match": {"ipAddress": host['_source']['ip4']}}, {"match": {"action": "Port scanning"}}]}}}
@@ -503,7 +507,8 @@ def create_app():
                       'name': name,
                       'mac': mac,
                       'product': product,
-                      'version': version}
+                      'version': version,
+                      'lastSeen': str(int(round(time.time() * 1000)))}
             es.write(esService, portData, 'sweet_security', 'ports')
             return jsonify(status='success',reason='Port added')
         elif len(portInfo['hits']['hits']) == 0:
@@ -512,7 +517,8 @@ def create_app():
                       'name': name,
                       'mac': mac,
                       'product': product,
-                      'version': version}
+                      'version': version,
+                      'lastSeen': str(int(round(time.time() * 1000)))}
             es.write(esService, portData, 'sweet_security', 'ports')
             return jsonify(status='success',reason='Port added')
         elif len(portInfo['hits']['hits']) == 1:
@@ -535,6 +541,8 @@ def create_app():
             if portData['version'] != previousPortData['version']:
                 body = {'doc' : {'version': portData['version']}}
                 es.update(esService, body, 'sweet_security', 'ports', portInfo['hits']['hits'][0]['_id'])
+            body = {'doc': {'lastSeen': str(int(round(time.time() * 1000)))}}
+            es.update(esService, body, 'sweet_security', 'ports', portInfo['hits']['hits'][0]['_id'])
             return jsonify(status='success',reason='port information updated')
         else:
             return jsonify(status='error',reason='duplicate ports found')

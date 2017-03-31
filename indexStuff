@@ -9,7 +9,8 @@ curl -XPUT 'localhost:9200/sweet_security?pretty' -H 'Content-Type: application/
         "protocol" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},
         "name" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},
         "product" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},
-        "version" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}}
+        "version" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},
+        "lastSeen": { "type" : "date" }
       }
     },
     "devices" : {

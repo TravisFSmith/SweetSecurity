@@ -130,16 +130,18 @@
 											<div class="col-xs-2"><b>Port</b></div>
 											<div class="col-xs-2"><b>Protocol</b></div>
 											<div class="col-xs-2"><b>Name</b></div>
-											<div class="col-xs-4"><b>Product</b></div>
+											<div class="col-xs-2"><b>Product</b></div>
 											<div class="col-xs-2"><b>Version</b></div>
+											<div class="col-xs-2"><b>Last Seen</b></div>
 										</div>
 {% for port in deviceInfo['portList'] %}
 										<div class="row" style="border-bottom: 1px solid #ccc;">
 											<div class="col-xs-2">{{ port['port'] }}</div>
 											<div class="col-xs-2">{{ port['protocol'] }}</div>
 											<div class="col-xs-2">{{ port['name'] }}</div>
-											<div class="col-xs-4">{{ port['product'] }}</div>
+											<div class="col-xs-2">{{ port['product'] }}</div>
 											<div class="col-xs-2">{{ port['version'] }}</div>
+											<div class="col-xs-2">{{ port['lastSeen'] }}</div>
 										</div>
 {% endfor %}
 									</div>
