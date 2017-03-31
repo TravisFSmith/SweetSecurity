@@ -282,6 +282,8 @@ def create_app():
 
     @app.route('/device/<mac>')
     def updateDevice(mac):
+        serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+        serverIP = serverIP[0]
         deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
         deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
         if deviceInfo is None:
@@ -336,7 +338,7 @@ def create_app():
                                             sslHosts.append(sslHit['_source']['server_name'])
                             info={'ip': blockedPacket['_source']['dstIP'], 'urls': sslHosts}
                             blockedIPs.append(info)
-            return render_template('device.html', deviceInfo=deviceInfo, blockedIPs=blockedIPs)
+            return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, blockedIPs=blockedIPs)
         else:
             #This happens when the web component is still booting up and the ES index hasn't initialized
             #Sometimes we get two devices, we'll delete the old one and let the sensor send info on it's next update
