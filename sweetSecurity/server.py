@@ -1,6 +1,6 @@
 import base64, json, sqlite3, ssl, urllib, urllib2, requests
 
-dbPath="/opt/SweetSecurity/SweetSecurity.db"
+dbPath="/opt/sweetsecurity/SweetSecurity.db"
 
 def getCreds():
 	creds={'address': None, 'user': None, 'pass': None, 'webCert': 'development'}

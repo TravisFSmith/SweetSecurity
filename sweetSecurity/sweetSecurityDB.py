@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os, sqlite3, sys
 
-dbPath="/opt/SweetSecurity/SweetSecurity.db"
+dbPath="/opt/sweetsecurity/SweetSecurity.db"
 
 def getDfgw():
 	dfgw={'dfgw': None, 'dfgwMAC': None}
@@ -148,4 +148,4 @@ if __name__=="__main__":
 			sys.exit('Must supply an interface name')
 		print changeInterface(sys.argv[2])
 	else:
-		print("The only supported actions are create, show, showSpoofed, spoof, and ignore...")
+		print("The only supported actions are create, show, showSpoofed, spoof, ignore, cert, and interface...")

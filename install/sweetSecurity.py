@@ -8,11 +8,11 @@ def install(chosenInterface):
 	#Install SweetSecurity Code
 	print "Installing Sweet Security Code"
 	#Configure Sweet Security Scripts
-	if os.path.exists('/opt/SweetSecurity'):
-		shutil.rmtree('/opt/SweetSecurity')
-	shutil.copytree('sweetSecurity/','/opt/SweetSecurity')
-	if not os.path.isfile('/opt/SweetSecurity/SweetSecurity.db'):
-		conn = sqlite3.connect('/opt/SweetSecurity/SweetSecurity.db')
+	if os.path.exists('/opt/sweetsecurity'):
+		shutil.rmtree('/opt/sweetsecurity')
+	shutil.copytree('sweetSecurity/','/opt/sweetsecurity')
+	if not os.path.isfile('/opt/sweetsecurity/SweetSecurity.db'):
+		conn = sqlite3.connect('/opt/sweetsecurity/SweetSecurity.db')
 		c = conn.cursor()
 		c.execute('''CREATE TABLE configuration (object text, value text)''')
 		c.execute('''CREATE TABLE hosts(hostname text, nickname text, ip4 integer, mac text, vendor text, ignore integer, active integer, firstSeen text, lastSeen text)''')
@@ -28,7 +28,7 @@ def install(chosenInterface):
 	os.popen('sudo systemctl enable sweetsecurity.service').read()
 
 def addWebCreds(address,user,pwd):
-	conn = sqlite3.connect('/opt/SweetSecurity/SweetSecurity.db')
+	conn = sqlite3.connect('/opt/sweetsecurity/SweetSecurity.db')
 	c = conn.cursor()
 	query = "INSERT INTO configuration VALUES ('%s','%s')" % ('webAddress',str(address))
 	c.execute(query)

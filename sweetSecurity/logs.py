@@ -1,7 +1,7 @@
 import logging
 
 def setup():
-	LOG_FILENAME='/opt/SweetSecurity/sweetSecurity.log'
+	LOG_FILENAME='/var/log/sweetsecurity.log'
 	logger = logging.getLogger('SweetSecurityLogger')
 	logger.setLevel(logging.INFO) 
 	handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20000000, backupCount=5)

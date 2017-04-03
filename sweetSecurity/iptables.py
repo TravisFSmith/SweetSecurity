@@ -3,7 +3,7 @@ import sweetSecurityDB
 def writeHeader():
 	dfgw=sweetSecurityDB.getDfgw()
 	dfgw=dfgw['dfgw']
-	f = open('/opt/SweetSecurity/iptables_new.sh','w')
+	f = open('/opt/sweetsecurity/iptables_new.sh','w')
 	f.write('IPTABLES=/sbin/iptables\n')
 	f.write('sudo ${IPTABLES} --flush\n')
 	f.write('sudo ${IPTABLES} --delete-chain\n')
@@ -34,7 +34,7 @@ def writeHeader():
 	f.write('sudo ${IPTABLES} -A INPUT -s "224.0.0.251" -j ACCEPT\n')
 	f.close()
 def writeFooter():
-	f = open('/opt/SweetSecurity/iptables_new.sh','a')
+	f = open('/opt/sweetsecurity/iptables_new.sh','a')
 	f.write('sudo ${IPTABLES} -N LOGGING\n')
 	f.write('sudo ${IPTABLES} -A FORWARD -j LOGGING\n')
 	#f.write('sudo ${IPTABLES} -A LOGGING -m limit --limit 50/min -j LOG --log-prefix "IPTables-Dropped: " --log-level 4\n')
@@ -44,13 +44,13 @@ def writeFooter():
 	f.close()
 
 def addSimple(source,action):
-	f = open('/opt/SweetSecurity/iptables_new.sh','a')
+	f = open('/opt/sweetsecurity/iptables_new.sh','a')
 	f.write('sudo ${IPTABLES} -A FORWARD -s "%s" -j %s\n' % (source,action))
 	f.write('sudo ${IPTABLES} -A FORWARD -d "%s" -j %s\n' % (source,action))
 	f.close()
 
 def addFull(source,destination,action):
-	f = open('/opt/SweetSecurity/iptables_new.sh','a')
+	f = open('/opt/sweetsecurity/iptables_new.sh','a')
 	f.write('sudo ${IPTABLES} -A FORWARD -s "%s" -d "%s" -j %s\n' % (source,destination,action))
 	f.write('sudo ${IPTABLES} -A FORWARD -s "%s" -d "%s" -j %s\n' % (destination,source,action))
 	f.close()

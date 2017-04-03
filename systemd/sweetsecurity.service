@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/python /opt/SweetSecurity/sweetSecurity.py
+ExecStart=/usr/bin/python /opt/sweetsecurity/sweetSecurity.py
 
 [Install]
 WantedBy=multi-user.target

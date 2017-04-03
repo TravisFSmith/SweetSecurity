@@ -37,22 +37,22 @@ def startGetConfig():
 					elif len(entry['destination']) > 0:
 						iptables.addFull(device['ip'],entry['destination'],entry['action'])
 			iptables.writeFooter()
-			if os.path.isfile('/opt/SweetSecurity/iptables_existing.sh'):
+			if os.path.isfile('/opt/sweetsecurity/iptables_existing.sh'):
 				#Check if it changed to see if we need to apply it or not...
-				existingHash=hashlib.md5(open('/opt/SweetSecurity/iptables_existing.sh','rb').read()).hexdigest()
-				newHash=hashlib.md5(open('/opt/SweetSecurity/iptables_new.sh','rb').read()).hexdigest()
+				existingHash=hashlib.md5(open('/opt/sweetsecurity/iptables_existing.sh','rb').read()).hexdigest()
+				newHash=hashlib.md5(open('/opt/sweetsecurity/iptables_new.sh','rb').read()).hexdigest()
 				if newHash != existingHash:
-					os.remove('/opt/SweetSecurity/iptables_existing.sh')
-					shutil.move('/opt/SweetSecurity/iptables_new.sh','/opt/SweetSecurity/iptables_existing.sh')
-					os.chmod('/opt/SweetSecurity/iptables_existing.sh',755)
-					os.popen('sudo /opt/SweetSecurity/iptables_existing.sh').read()
+					os.remove('/opt/sweetsecurity/iptables_existing.sh')
+					shutil.move('/opt/sweetsecurity/iptables_new.sh','/opt/sweetsecurity/iptables_existing.sh')
+					os.chmod('/opt/sweetsecurity/iptables_existing.sh',755)
+					os.popen('sudo /opt/sweetsecurity/iptables_existing.sh').read()
 					logger.info('applying new firewall config')
 				else:
-					os.remove('/opt/SweetSecurity/iptables_new.sh')
+					os.remove('/opt/sweetsecurity/iptables_new.sh')
 			else:
-				shutil.move('/opt/SweetSecurity/iptables_new.sh','/opt/SweetSecurity/iptables_existing.sh')
-				os.chmod('/opt/SweetSecurity/iptables_existing.sh',755)
-				os.popen('sudo /opt/SweetSecurity/iptables_existing.sh').read()
+				shutil.move('/opt/sweetsecurity/iptables_new.sh','/opt/sweetsecurity/iptables_existing.sh')
+				os.chmod('/opt/sweetsecurity/iptables_existing.sh',755)
+				os.popen('sudo /opt/sweetsecurity/iptables_existing.sh').read()
 				logger.info('applying new firewall config')
 		except:
 			pass

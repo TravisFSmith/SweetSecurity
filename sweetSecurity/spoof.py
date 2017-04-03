@@ -5,7 +5,7 @@ logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 
 import sweetSecurityDB
-dbPath="/opt/SweetSecurity/SweetSecurity.db"
+dbPath="/opt/sweetsecurity/SweetSecurity.db"
 
 def convertMAC(mac):
 	newMac="%s%s:%s%s:%s%s:%s%s:%s%s:%s%s" % (mac[0],mac[1],mac[2],mac[3],mac[4],mac[5],mac[6],mac[7],mac[8],mac[9],mac[10],mac[11])
