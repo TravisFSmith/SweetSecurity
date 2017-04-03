@@ -338,13 +338,15 @@ def create_app():
                     for entry in fwData['hits']['hits']:
                         fwList.append(entry['_source'])
                 deviceInfo['fwList']=fwList
-                
+
+                blockedIPList=[]
                 blockedIPs=[]
                 blockedTrafficQuery = {"query":{"bool":{"must":[{"match":{"srcIP": host['_source']['ip4'] }},{ "match": { "path": "/var/log/kern.log" }}]}}}
                 blockedTraffic=es.search(esService,blockedTrafficQuery,'logstash-*','logs')
                 if blockedTraffic is not None:
                     for blockedPacket in blockedTraffic['hits']['hits']:
-                        if blockedPacket['_source']['dstIP'] not in blockedIPs:
+                        if blockedPacket['_source']['dstIP'] not in blockedIPList:
+                            blockedIPList.append(blockedPacket['_source']['dstIP'])
                             sslHosts=[]
                             sslQuery={"query":{"bool":{"must":[{"match":{"resp_h": blockedPacket['_source']['dstIP'] }},{ "match": { "path": "/opt/nsm/bro/logs/current/ssl.log" }}]}}}
                             sslInfo=es.search(esService,sslQuery,'logstash-*','logs',10000)
