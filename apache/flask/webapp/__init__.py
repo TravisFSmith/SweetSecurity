@@ -315,7 +315,7 @@ def create_app():
                     for port in portInfo['hits']['hits']:
                         portInfoTmp = port['_source']
                         time = datetime.datetime.fromtimestamp(float(port['_source']['lastSeen']) / 1000.)
-                        time = time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                        time = time.strftime('%Y-%m-%d %H:%M')
                         portInfoTmp['lastSeen'] = time
                         portList.append(portInfoTmp)
                 deviceInfo['portList']=portList
@@ -324,7 +324,8 @@ def create_app():
                 lastPortScanInfo = es.search(esService, lastPortScanQuery, 'logstash-*', 'logs', 1)
                 if lastPortScanInfo is not None:
                     if len(lastPortScanInfo['hits']['hits']) > 0:
-                        lastPortScan = lastPortScanInfo['hits']['hits'][0]['_source']['@timestamp']
+                        lastPortScan = datetime.datetime.strptime(lastPortScanInfo['hits']['hits'][0]['_source']['@timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                        lastPortScan = lastPortScan.strftime('%Y-%m-%d %H:%M')
                     else:
                         lastPortScan = 'Device has not been port scanned'
                 else:
