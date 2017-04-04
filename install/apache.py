@@ -19,9 +19,8 @@ def install(installType,chosenInterface,chosenIP):
 	shutil.copytree('apache/flask/webapp','/var/www/webapp/webapp')
 	shutil.move('/etc/apache2/sites-available/000-default.conf','/etc/apache2/sites-available/000-default_org')
 	shutil.copyfile('apache/sites/default-ssl.conf', '/etc/apache2/sites-available/default-ssl.conf')
-	with open("/etc/apache2/ports.conf", "a") as portConf:
-		portConf.write("Listen 9201\n") # For elasticsearch
-		portConf.write("Listen 5602\n") # For kibana
+	shutil.move('/etc/apache2/ports.conf','/etc/apache2/ports.orig')
+	shutil.copyfile('apache/conf/ports.conf','/etc/apache2/ports.conf')
 	with open("/etc/apache2/sites-enabled/000-default.conf", "wt") as defaultOut:
 		defaultOut.write('<VirtualHost *:80>\n')
 		defaultOut.write('\tRedirect permanent "/" "https://%s"\n' % chosenIP)
