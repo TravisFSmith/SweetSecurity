@@ -114,16 +114,18 @@ def create_app():
                     'lastSeen': str(int(round(time.time() * 1000)))}
         deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
         deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
+        serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+        serverIP = serverIP[0]
         if deviceInfo is None:
             #First ever device...
             es.write(esService, newDeviceData, 'sweet_security', 'devices')
-            emailBody="Hostname: %s<br>Nickname: %s<br>IP Address: %s<br>MAC Address: %s<br>Vendor: %s" % (newDeviceData['hostname'], newDeviceData['nickname'], newDeviceData['ip4'], newDeviceData['mac'], newDeviceData['vendor'])
+            emailBody = render_template('emails/addDevice.html', deviceInfo=newDeviceData, serverIP=serverIP)
             email.emailUser(mail,"New Device Found",recipient,emailBody)
             return jsonify(status="Success", reason="Device added")
         elif len(deviceInfo['hits']['hits']) == 0:
             #New Device
             es.write(esService, newDeviceData, 'sweet_security', 'devices')
-            emailBody="Hostname: %s<br>Nickname: %s<br>IP Address: %s<br>MAC Address: %s<br>Vendor: %s" % (newDeviceData['hostname'], newDeviceData['nickname'], newDeviceData['ip4'], newDeviceData['mac'], newDeviceData['vendor'])
+            emailBody = render_template('emails/addDevice.html', deviceInfo=newDeviceData, serverIP=serverIP)
             email.emailUser(mail,"New Device Found",recipient,emailBody)
             return jsonify(status="Success", reason="Device added")
         elif len(deviceInfo['hits']['hits']) == 1:
@@ -222,11 +224,19 @@ def create_app():
             flash(u'Error finding device', 'error')
             return redirect('/')
         elif len(deviceInfo['hits']['hits']) == 1:
+            serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+            serverIP = serverIP[0]
             for hit in deviceInfo['hits']['hits']:
                 body = {'doc' : {'ignore': ignored}}
                 es.update(esService, body, 'sweet_security', 'devices', hit['_id'])
-            
-            emailBody="Hostname: %s<br>Nickname: %s<br>IP Address: %s<br>MAC Address: %s<br>Vendor: %s" % (deviceInfo['hits']['hits'][0]['_source']['hostname'], deviceInfo['hits']['hits'][0]['_source']['nickname'], deviceInfo['hits']['hits'][0]['_source']['ip4'], deviceInfo['hits']['hits'][0]['_source']['mac'], deviceInfo['hits']['hits'][0]['_source']['vendor'])
+            emailDeviceInfo = {'hostname': deviceInfo['hits']['hits'][0]['_source']['hostname'],
+                               'nickname': deviceInfo['hits']['hits'][0]['_source']['nickname'],
+                               'ip': deviceInfo['hits']['hits'][0]['_source']['ip4'],
+                               'mac': deviceInfo['hits']['hits'][0]['_source']['mac'],
+                               'vendor': deviceInfo['hits']['hits'][0]['_source']['vendor'],
+                               'ignore': ignored
+                               }
+            emailBody = render_template('emails/ignoreDevice.html', deviceInfo=emailDeviceInfo, serverIP=serverIP)
             if int(ignored)==0:
                 response=email.emailUser(mail,"Device Being Monitored",recipient,emailBody)
             else:
@@ -236,13 +246,22 @@ def create_app():
             flash(u'Device modified', 'success')
             return redirect('/')
         else:
+            serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+            serverIP = serverIP[0]
             es.consolidate(mac,esService)
             sleep(1)
             deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
             for hit in deviceInfo['hits']['hits']:
                 body = {'doc' : {'ignore': ignored}}
                 es.update(esService, body, 'sweet_security', 'devices', hit['_id'])
-            emailBody="Hostname: %s<br>Nickname: %s<br>IP Address: %s<br>MAC Address: %s<br>Vendor: %s" % (deviceInfo['hits']['hits'][0]['_source']['hostname'], deviceInfo['hits']['hits'][0]['_source']['nickname'], deviceInfo['hits']['hits'][0]['_source']['ip4'], deviceInfo['hits']['hits'][0]['_source']['mac'], deviceInfo['hits']['hits'][0]['_source']['vendor'])
+            emailDeviceInfo = {'hostname': deviceInfo['hits']['hits'][0]['_source']['hostname'],
+                               'nickname': deviceInfo['hits']['hits'][0]['_source']['nickname'],
+                               'ip': deviceInfo['hits']['hits'][0]['_source']['ip4'],
+                               'mac': deviceInfo['hits']['hits'][0]['_source']['mac'],
+                               'vendor': deviceInfo['hits']['hits'][0]['_source']['vendor'],
+                               'ignore': ignored
+                               }
+            emailBody = render_template('emails/ignoreDevice.html', deviceInfo=emailDeviceInfo, serverIP=serverIP)
             if int(ignored)==0:
                 email.emailUser(mail,"Device Being Monitored",recipient,emailBody)
             else:

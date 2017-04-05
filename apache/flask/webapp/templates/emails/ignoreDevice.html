@@ -1,0 +1,20 @@
+<div class="row">
+	<div><strong>Hostname: </strong>{{deviceInfo['hostname']|safe}}</div>
+</div>
+<div class="row">
+	<div><strong>Nickname: </strong>{{deviceInfo['nickname']|safe}} </div>
+</div>
+<div class="row">
+	<div><strong>IP Address: </strong>{{deviceInfo['ip']|safe}}</div>
+</div>
+<div class="row">
+	<div><strong>MAC Address: </strong>{{deviceInfo['mac']|safe}}</div>
+</div>
+<div class="row">
+	<div><strong>Vendor: </strong>{{deviceInfo['vendor']|safe}}</div>
+</div>
+<div class="row">
+	<div><strong>Device Monitored: </strong>{% if deviceInfo['ignore'] == '0' %}Yes{% else %}No{% endif %}</div>
+</div>
+
+<a href="https://{{serverIP}}/device/{{deviceInfo['mac']}}">View Device</a>
