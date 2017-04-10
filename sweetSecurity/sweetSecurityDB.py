@@ -113,6 +113,26 @@ def changeInterface(interfaceName):
 	conn.close()
 	return "Updated interface to %s" % interfaceName
 
+def changeServer(serverName):
+	t = (serverName,)
+	conn = sqlite3.connect(dbPath)
+	c = conn.cursor()
+	c.execute("UPDATE configuration SET value = ? where object = 'webAddress'", t)
+	conn.commit()
+	conn.close()
+	return "Updated webAddress to %s" % serverName
+
+def changeWebCreds(username,password):
+	tU = (username,)
+	tP = (password,)
+	conn = sqlite3.connect(dbPath)
+	c = conn.cursor()
+	c.execute("UPDATE configuration SET value = ? where object = 'webUser'", tU)
+	c.execute("UPDATE configuration SET value = ? where object = 'webPass'", tP)
+	conn.commit()
+	conn.close()
+	return "Updated web credentials"
+
 if __name__=="__main__":
 	action=str(sys.argv[1])
 	#python db.py create
@@ -143,9 +163,19 @@ if __name__=="__main__":
 			print changeCert('development')
 		else:
 			sys.exit('Unknown cert type, must be development or production')
-	elif (action=='interface'):
+	elif (action=="interface"):
 		if len(sys.argv) == 2:
 			sys.exit('Must supply an interface name')
 		print changeInterface(sys.argv[2])
+	elif (action =="server"):
+		if len(sys.argv) == 2:
+			sys.exit('Must supply a server name')
+		print changeServer(sys.argv[2])
+	elif (action =="webCreds"):
+		if len(sys.argv) == 2:
+			sys.exit('Must supply a username and password. EX sweetSecurityDB.py webCreds user pass')
+		elif len(sys.argv) == 3:
+			sys.exit('Must supply a username and password. EX sweetSecurityDB.py webCreds user pass')
+		print changeWebCreds(sys.argv[2],sys.argv[3])
 	else:
 		print("The only supported actions are create, show, showSpoofed, spoof, ignore, cert, and interface...")
