@@ -1,6 +1,8 @@
 import getpass, json, os, shutil, sys
 from time import sleep
 
+import hashCheck
+
 def get_user_input(input_string):
 	if sys.version_info[0] > 2:
 		return input(input_string)
@@ -9,7 +11,7 @@ def get_user_input(input_string):
 
 def install(esServer,esUser,esPass):
 	print "Installing Logstash"
-	logstashLatest='5.2.2'
+	logstashLatest='5.3.0'
 	
 	cpuArch=os.uname()[4]
 	cwd=os.getcwd()
@@ -52,14 +54,16 @@ def install(esServer,esUser,esPass):
 			smtpPort = get_user_input("    \033[1mEnter SMTP Port (ex: 587)\033[0m: ")
 			smtpUser = get_user_input("    \033[1mEnter Email Address (ex: email@gmail.com)\033[0m: ")
 			smtpPass = getpass.getpass("    \033[1mEnter Email Password (ex: P@55word)\033[0m: ")
-		print "  Downloading Logstash 5.2.2"
-		os.popen('sudo wget https://artifacts.elastic.co/downloads/logstash/logstash-5.2.2.deb 2>&1').read()
-		if not os.path.isfile('logstash-5.2.2.deb'):
+		print "  Downloading Logstash 5.3.0"
+		os.popen('sudo wget https://artifacts.elastic.co/downloads/logstash/logstash-5.3.0.deb 2>&1').read()
+		if not os.path.isfile('logstash-5.3.0.deb'):
 			sys.exit('Error downloading logstash')
+		if not hashCheck.checkHash('logstash-5.3.0.deb'):
+			sys.exit('Error downloading logstash, mismatched file hashes')
 		print "  Installing Logstash"
-		os.popen('sudo dpkg -i logstash-5.2.2.deb').read()
+		os.popen('sudo dpkg -i logstash-5.3.0.deb').read()
 		print "  Cleaning Up Logstash Installation Files"
-		os.remove('logstash-5.2.2.deb')
+		os.remove('logstash-5.3.0.deb')
 		os.popen('sudo systemctl enable logstash.service').read()
 		
 		if not cpuArch.startswith('x86'):

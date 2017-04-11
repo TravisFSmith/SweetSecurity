@@ -1,4 +1,5 @@
-import os, shutil
+import os, shutil, sys
+import hashCheck
 
 def install(chosenInterface,webServer):
 	
@@ -15,6 +16,10 @@ def install(chosenInterface,webServer):
 		print "Installing Bro IDS"
 		print "  Downloading Bro IDS 2.5"
 		os.popen('sudo wget https://www.bro.org/downloads/bro-2.5.tar.gz 2>&1').read()
+		if not os.path.isfile('bro-2.5.tar.gz'):
+			sys.exit('Error downloading Kibana')
+		if not hashCheck.checkHash('bro-2.5.tar.gz'):
+			sys.exit('Error downloading Bro, mismatched file hashes')
 		print "  Unpacking Bro Code"
 		os.popen('sudo tar -xzf bro-2.5.tar.gz').read()
 		print "  Creating Bro Directory Structures"
