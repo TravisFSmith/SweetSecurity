@@ -47,6 +47,8 @@ def convertMac(macAddress):
 
 def pingSweep():
 	logger = logging.getLogger('SweetSecurityLogger')
+	if not os.path.exists('/opt/sweetsecurity/nmap_scans'):
+		os.makedirs('/opt/sweetsecurity/nmap_scans')
 	device=str(getSpoofingInterface())
 	ip = getIP(device)
 	netmask = getNetmask(device)
@@ -56,8 +58,9 @@ def pingSweep():
 		dfgw=getSystemDfgw()
 	webAddress=sweetSecurityDB.getWebAddress()
 	logger.info('Beginning Ping Sweep')
-	os.popen("sudo nmap -sn %s/%s -e %s -oX /opt/sweetsecurity/nmap.xml" % (ip,str(netmask),device)).read()
-	file='/opt/sweetsecurity/nmap.xml'
+
+	os.popen("sudo nmap -sn %s/%s -e %s -oX /opt/sweetsecurity/nmap_scans/pingSweep.xml" % (ip,str(netmask),device)).read()
+	file='/opt/sweetsecurity/nmap_scans/pingSweep.xml'
 	try:
 		tree = ET.parse(file)
 		root = tree.getroot()
@@ -142,6 +145,8 @@ def pingSweep():
 def portScan():
 	logger = logging.getLogger('SweetSecurityLogger')
 	logger.info("Beginning port scan")
+	if not os.path.exists('/opt/sweetsecurity/nmap_scans'):
+		os.makedirs('/opt/sweetsecurity/nmap_scans')
 	try:
 		deviceList=[]
 		conn = sqlite3.connect(dbPath)
@@ -150,12 +155,13 @@ def portScan():
 			deviceInfo={'ip': row[2], 'mac': row[3]}
 			deviceList.append(deviceInfo)
 		conn.close()
-	except Exception,e: 
+	except Exception,e:
 		logger.info("SQL Query Error: %s",str(e))
 	for device in deviceList:
 		logger.info("Port scanning %s",device['ip'])
-		os.popen("nmap -sV -oX /opt/sweetsecurity/portScan.xml %s" % device['ip']).read()
-		file='/opt/sweetsecurity/portScan.xml'
+		file="/opt/sweetsecurity/nmap_scans/portScan_%s_%s.xml" % (datetime.now().strftime('%Y-%m-%d_%H-%M'),device['ip'])
+		os.popen("nmap -sV -oX %s %s" % (file,device['ip'])).read()
+		#file='/opt/sweetsecurity/portScan.xml'
 		try:
 			tree = ET.parse(file)
 			root = tree.getroot()
@@ -170,7 +176,7 @@ def portScan():
 						serviceName=service.get('name')
 						serviceProduct=service.get('product')
 						serviceVersion=service.get('version')
-				portInfo={'macAddress': device['mac'], 
+				portInfo={'macAddress': device['mac'],
 						'port': portNum,
 						'protocol': proto,
 						'name': serviceName,
