@@ -711,7 +711,7 @@ def create_app():
                     memConsumed=memUsageData['hits']['hits'][0]['_source']['memConsumed']
                     memPercent=memUsageData['hits']['hits'][0]['_source']['memPercentUsed']
                 time=datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%fZ')
-                timeSince=datetime.datetime.now()-time
+                timeSince=datetime.datetime.utcnow()-time
                 systemInfo={
                 'time': time,
                 'timeSince': int(timeSince.seconds / 60.0),
