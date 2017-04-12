@@ -28,6 +28,7 @@ def install(installType):
 		os.popen('sudo pip install requests 2>&1').read()
 		os.popen('sudo pip install flask-mail 2>&1').read()
 		os.popen('sudo pip install flask_wtf 2>&1').read()
+		os.popen('sudo pip install cryptography --upgrade > 2>&1').read()
 	elif installType=='2':
 		#Sensor Install
 		if cpuArch.startswith('x86'):
@@ -44,3 +45,4 @@ def install(installType):
 		os.popen('sudo pip install elasticsearch 2>&1').read()
 		os.popen('sudo pip install flask-mail 2>&1').read()
 		os.popen('sudo pip install flask_wtf 2>&1').read()
+		os.popen('sudo pip install cryptography --upgrade > 2>&1').read()
