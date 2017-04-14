@@ -1,9 +1,10 @@
-ssNewDeviceLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sNew\sdevice\sdiscovered\:\shostname=(?<hostname>[^,\s]+),\sip=(?<ipAddress>[^,\s]+),\s(?<macAddress>[^,\s]+),\svendor=(?<vendor>.*)
-ssUpdateHostnameLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sUpdate\shostname\sof\sdevice\s(?<macAddress>[^\s]+)\sfrom\s(?<oldHostname>[^\s]+)\sto\s(?<hostname>.*)
-ssUpdateIpLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sUpdate\sip\sof\sdevice\s(?<macAddress>[^\s]+)\sfrom\s(?<oldIpAddress>[^\s]+)\sto\s(?<ipAddress>.*)
-ssDeviceScanLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sDevice\sScanned\:\s(?<macAddress>.*)
+ssNewDeviceLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sNew\sdevice\sdiscovered\:\shostname=(?<hostname>[^,\s]+),\sip=(?<ipAddress>[^,\s]+),\s(?<mac>[^,\s]+),\svendor=(?<vendor>.*)
+ssUpdateHostnameLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sUpdate\shostname\sof\sdevice\s(?<mac>[^\s]+)\sfrom\s(?<oldHostname>[^\s]+)\sto\s(?<hostname>.*)
+ssUpdateIpLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sUpdate\sip\sof\sdevice\s(?<mac>[^\s]+)\sfrom\s(?<oldIpAddress>[^\s]+)\sto\s(?<ipAddress>.*)
+ssDeviceScanLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sDevice\sScanned\:\s(?<mac>.*)
 ssLogstashHealthLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sLogstash\sHealth=\"(?<logstashHealth>[^\"]+)\".*
 ssBroHealthLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sBro\sHealth\s=\s\"(?<broHealth>[^\"]+)\".*
 ssDiskUsageLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sDisk\sPercentage\sAvailable\:\s(?<diskUsage>\d+).*
 ssMemUsageLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sMemory Available\s=\s\"(?<memAvailable>\d+)\",\sMemory\sConsumed\s\=\s\"(?<memConsumed>\d+)\"\,\sPercent\sUsed\s\=\s\"(?<memPercentUsed>\d+)\".*
 ssPortScanLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\s(?<action>Port\sscanning)\s(?<ipAddress>.*)
+ssSpoofLog \d+\-\d\d\-\d\d\s\d\d\:\d\d\:\d\d\,\d+\:\sSpoofing\sDevice\:\sip=(?<ipAddress>[^\s]+)\,\smac=(?<mac>.*)
