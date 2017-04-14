@@ -66,7 +66,19 @@ if __name__=="__main__":
 			print("Choose 1, 2, or 3.")
 		else:
 			break
-	
+
+	memAvailable=0
+	memInfo = os.popen('free -t -m').read()
+	for line in memInfo.splitlines():
+		if line.rstrip().startswith('Mem:'):
+			memAvailable=int(line.split()[1])
+	#Give room for swap space
+	if memAvailable < 900:
+		sys.exit('Less than 1GB of memory. You need more than this to continue.')
+	if installType == '1':
+		if memAvailable < 1800:
+			sys.exit('Less than 2GB of memory available.  Consider splitting installs across multiple devices.')
+
 	#Install prerequisites
 	packages.install(installType)
 	
@@ -168,7 +180,7 @@ if __name__=="__main__":
 		if criticalStackInstalled == False and installCriticalStack.lower()=='y':
 			criticalStack.install(csKey)
 		else:
-			print "Critical Stack already installed"
+			print "Skipping Critical Stack Install"
 		apache.install(installType,chosenInterface,chosenInterfaceIP)
 		print "  Creating web portal credentials"
 		os.popen('sudo htpasswd -cb /etc/apache2/.htpasswd %s "%s"' % (httpUser,httpPass)).read()
