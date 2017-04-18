@@ -14,6 +14,14 @@ import email
 import es
 import validators
 
+#These are the values for when a new device is found.
+#1 means device is ignored, 0 means device is monitored
+defaultMonitorAction='1'
+#1 means device is isolated, 0 means device can access any local resource
+defaultIsolateAction='0'
+#Values can be ACCEPT or DROP
+defaultFwAction='ACCEPT'
+
 class ConfigClass(object):
 __appSettings__
     CSRF_ENABLED = True
@@ -75,7 +83,7 @@ def create_app():
         ip=''
         mac=''
         vendor=''
-        ignored='None'
+        #ignored='None'
         f = request.form
         for key in f.keys():
             for value in f.getlist(key):
@@ -91,8 +99,8 @@ def create_app():
                     mac=validators.convertMac(mac)
                 if key == "vendor":
                     vendor=request.form['vendor']
-                if key == "ignored":
-                    ignored=request.form['ignored']
+                #if key == "ignored":
+                #    ignored=request.form['ignored']
         if len(mac)==0:
             return jsonify(status="Error", reason="Must Supply MAC Address")
         if validators.macAddress(mac) == False:
@@ -101,15 +109,16 @@ def create_app():
             return jsonify(status="Error", reason="Invalid IP Address")
         if len(hostname) > 0 and validators.hostname(hostname) == False:
             return jsonify(status="Error", reason="Invalid Hostname")
-        if ignored != "None" and validators.ignoreStatus(ignored) == False:
-            return jsonify(status="Error", reason="Invalid Ignore Status")
+        #if ignored != "None" and validators.ignoreStatus(ignored) == False:
+        #    return jsonify(status="Error", reason="Invalid Ignore Status")
         newDeviceData={'hostname': hostname,
                     'nickname': hostname,
                     'ip4': ip,
                     'mac': mac,
                     'vendor': vendor,
-                    'ignore': ignored,
-                    'defaultFwAction': 'ACCEPT',
+                    'ignore': defaultMonitorAction,
+                    'defaultFwAction': defaultFwAction,
+                    'isolate': defaultIsolateAction,
                     'firstSeen': str(int(round(time.time() * 1000))),
                     'lastSeen': str(int(round(time.time() * 1000)))}
         deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
@@ -271,6 +280,40 @@ def create_app():
             flash(u'Device modified', 'success')
             return redirect('/')
 
+    @app.route('/isolateDevice', methods=['POST'])
+    def isolateDevice():
+        mac = ''
+        isolate = ''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "macAddress":
+                    mac = request.form['macAddress']
+                if key == "isolate":
+                    isolate = request.form['isolate']
+        if len(mac) == 0:
+            flash(u'MAC Address Missing For Device', 'error')
+            return redirect('/')
+        if len(isolate) == 0:
+            flash(u'Missing isolate flag', 'error')
+            return redirect('/')
+
+        deviceQuery = {"query": {"match_phrase": {"mac": {"query": mac}}}}
+        deviceInfo = es.search(esService, deviceQuery, 'sweet_security', 'devices')
+        if deviceInfo is None:
+            flash(u'Error finding device', 'error')
+            return redirect('/')
+        elif len(deviceInfo['hits']['hits']) == 0:
+            flash(u'Error finding device', 'error')
+            return redirect('/')
+        elif len(deviceInfo['hits']['hits']) == 1:
+            for hit in deviceInfo['hits']['hits']:
+                body = {'doc': {'isolate': isolate}}
+                es.update(esService, body, 'sweet_security', 'devices', hit['_id'])
+            sleep(1)
+            flash(u'Device modified', 'success')
+            return redirect('/')
+
     @app.route('/deleteDevice', methods=['POST'])
     def deleteDevice():
         mac=''
@@ -323,6 +366,7 @@ def create_app():
                         'mac': host['_source']['mac'],
                         'vendor': host['_source']['vendor'],
                         'ignore': str(host['_source']['ignore']),
+                        'isolate': str(host['_source']['isolate']),
                         'defaultFwAction': host['_source']['defaultFwAction'],
                         'firstSeen': datetime.datetime.fromtimestamp(firstSeen).strftime('%Y-%m-%d %H:%M:%S'),
                         'lastSeen': datetime.datetime.fromtimestamp(lastSeen).strftime('%Y-%m-%d %H:%M:%S')}
@@ -597,6 +641,7 @@ def create_app():
                         'vendor': host['_source']['vendor'],
                         'ignore': str(host['_source']['ignore']),
                         'firewall': fwList,
+                        'isolate': str(host['_source']['isolate']),
                         'firstSeen': host['_source']['firstSeen'],
                         'lastSeen': host['_source']['lastSeen']}
                 deviceList.append(deviceInfo)

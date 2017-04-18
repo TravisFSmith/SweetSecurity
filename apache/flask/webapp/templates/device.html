@@ -44,6 +44,10 @@
 												<div class="col-xs-3"><strong><span class="pull-right">Last Seen</span></strong></div>
 												<div class="col-xs-9">{{deviceInfo['lastSeen']|safe}}</div>
 											</div>
+                                            <div class="row">
+                                                <div class="col-xs-3"><strong><span class="pull-right">Isolate Device</span></strong></div>
+                                                <div class="col-xs-9">{% if deviceInfo['isolate'] == '0'%}<input type="checkbox" onchange="isolateDevice(this,'{{deviceInfo['mac']}}','1')" >&nbsp;No{%else%}<input type="checkbox" checked onchange="isolateDevice(this,'{{deviceInfo['mac']}}','0')" >&nbsp;Yes{%en$
+                                            </div>
 											<div class="row">
 												<div class="col-xs-3"><strong><span class="pull-right">Device Monitored</span></strong></div>
 												<div class="col-xs-9">
@@ -369,6 +373,19 @@ function deleteFW(destination) {
       },
       function (response, status) {
           window.location.reload();
+      }
+    );
+}
+
+function isolateDevice(checkboxElem,macAddress,isolate) {
+  $.post('/isolateDevice',
+      {
+        'macAddress': macAddress,
+        'isolate': isolate,
+        'csrf_token': '{{ csrf_token() }}'
+      },
+      function (response, status) {
+        window.location.reload();
       }
     );
 }
