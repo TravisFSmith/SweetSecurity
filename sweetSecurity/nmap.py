@@ -167,21 +167,25 @@ def portScan():
 			root = tree.getroot()
 			#Parse the portScan.xml file
 			for port in root.findall("./host/ports/port"):
-				portNum=str(port.get('portid'))
-				proto=port.get('protocol')
-				serviceName=''
-				serviceProduct=''
-				serviceVersion=''
-				for service in port.findall("./service"):
-						serviceName=service.get('name')
-						serviceProduct=service.get('product')
-						serviceVersion=service.get('version')
-				portInfo={'macAddress': device['mac'],
-						'port': portNum,
-						'protocol': proto,
-						'name': serviceName,
-						'version': serviceVersion,
-						'product': serviceProduct}
-				server.addPort(portInfo)
+				portState='filtered'
+				for state in port.findall("./state"):
+					portState=state.get('state')
+				if portState == 'open':
+					portNum=str(port.get('portid'))
+					proto=port.get('protocol')
+					serviceName=''
+					serviceProduct=''
+					serviceVersion=''
+					for service in port.findall("./service"):
+							serviceName=service.get('name')
+							serviceProduct=service.get('product')
+							serviceVersion=service.get('version')
+					portInfo={'macAddress': device['mac'],
+							'port': portNum,
+							'protocol': proto,
+							'name': serviceName,
+							'version': serviceVersion,
+							'product': serviceProduct}
+					server.addPort(portInfo)
 		except:
 			logger.info("Invalid Port Scan XML File")
