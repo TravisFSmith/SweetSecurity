@@ -46,7 +46,7 @@
 											</div>
                                             <div class="row">
                                                 <div class="col-xs-3"><strong><span class="pull-right">Isolate Device</span></strong></div>
-                                                <div class="col-xs-9">{% if deviceInfo['isolate'] == '0'%}<input type="checkbox" onchange="isolateDevice(this,'{{deviceInfo['mac']}}','1')" >&nbsp;No{%else%}<input type="checkbox" checked onchange="isolateDevice(this,'{{deviceInfo['mac']}}','0')" >&nbsp;Yes{%en$
+                                                <div class="col-xs-9">{% if deviceInfo['isolate'] == '0'%}<input type="checkbox" onchange="isolateDevice(this,'{{deviceInfo['mac']}}','1')" >&nbsp;No{%else%}<input type="checkbox" checked onchange="isolateDevice(this,'{{deviceInfo['mac']}}','0')" >&nbsp;Yes{%endif%}</div>
                                             </div>
 											<div class="row">
 												<div class="col-xs-3"><strong><span class="pull-right">Device Monitored</span></strong></div>
