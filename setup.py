@@ -12,6 +12,7 @@ from install import logstash
 from install import kibana 
 from install import sweetSecurity
 from install import apache
+from install import fail2ban
 
 #Issue: When using OpenDNS, no hostname resolution
 
@@ -165,7 +166,7 @@ if __name__=="__main__":
 			while True:
 				installCriticalStack = get_user_input("\033[1mInstall Critical Stack Threat Intel For Bro IDS (Y/n)\033[0m: ")
 				if installCriticalStack.lower() not in ('y', 'n', ''):
-					print("Must choose Y or N.")
+					print "Must choose Y or N."
 				else:
 					break
 			if installCriticalStack.lower()=='y' or len(installCriticalStack) == 0:
@@ -181,6 +182,15 @@ if __name__=="__main__":
 			criticalStack.install(csKey)
 		else:
 			print "Skipping Critical Stack Install"
+		#Check if We Should Install Fail2Ban
+		while True:
+			installFail2Ban = get_user_input("\033[1mInstall Fail2Ban (Y/n)\033[0m: ")
+			if installFail2Ban.lower() not in ('y', 'n', ''):
+				print "Must choose Y or N."
+			else:
+				break
+		if installFail2Ban == 'y' or installFail2Ban == '':
+			fail2ban.install()
 		apache.install(installType,chosenInterface,chosenInterfaceIP)
 		print "  Creating web portal credentials"
 		os.popen('sudo htpasswd -cb /etc/apache2/.htpasswd %s "%s"' % (httpUser,httpPass)).read()
@@ -227,6 +237,15 @@ if __name__=="__main__":
 		os.popen('sudo service sweetsecurity restart').read()
 	elif installType == '3':
 		#Elasticsearch, Kibana, Apache
+		# Check if We Should Install Fail2Ban
+		while True:
+			installFail2Ban = get_user_input("\033[1mInstall Fail2Ban (Y/n)\033[0m: ")
+			if installFail2Ban.lower() not in ('y', 'n', ''):
+				print "Must choose Y or N."
+			else:
+				break
+		if installFail2Ban == 'y' or installFail2Ban == '':
+			fail2ban.install()
 		apache.install(installType,chosenInterface,chosenInterfaceIP)
 		print "  Creating web portal credentials"
 		os.popen('sudo htpasswd -cb /etc/apache2/.htpasswd %s "%s"' % (httpUser,httpPass)).read()
