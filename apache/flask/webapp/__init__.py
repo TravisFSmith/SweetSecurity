@@ -822,7 +822,6 @@ def create_app():
         sensorQuery = {"query": {"bool": {"must": [{"exists": {"field": "logstashHealth"}}, {"match": {"host": sensorName}}]}}}
         sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs')
         docCount = sensorHostData['hits']['total']
-        print docCount
         sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs', docCount)
         for sensor in sensorHostData['hits']['hits']:
             es.delete(esService, sensor['_index'], 'logs', sensor['_id'])
