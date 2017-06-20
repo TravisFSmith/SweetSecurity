@@ -793,6 +793,7 @@ def create_app():
                     'time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastSeenTime)),
                     'timeSince': int(timeSince / 1000) / 60,
                     'sensorName': sensor['_source']['sensorName'],
+                    'sensorMac': sensor['_source']['mac'],
                     'logstash': sensor['_source']['logstashHealth'],
                     'broStatus': sensor['_source']['broHealth'],
                     'diskUsage': int(sensor['_source']['diskUsage']),
