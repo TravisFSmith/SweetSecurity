@@ -1,5 +1,5 @@
-import os
-import logging
+import os, socket
+import logging, server, spoof
 
 def check():
 	logger = logging.getLogger('SweetSecurityLogger')
@@ -49,3 +49,12 @@ def check():
 			memUsage['percentUsed']=int(round((float(line.split()[2]) / float(line.split()[1])) * 100,0))
 	#print 'Memory Available = "%s", Memory Consumed = "%s", Percent Used = "%d"' % (memUsage['available'],memUsage['consumed'],memUsage['percentUsed'])
 	logger.info('Memory Available = "%s", Memory Consumed = "%s", Percent Used = "%d"' % (memUsage['available'],memUsage['consumed'],memUsage['percentUsed']))
+	healthInfo={'sensorMac': spoof.getMac(), #done
+		    'sensorName': socket.gethostname(), #done
+		    'broHealth': broStatus, #done
+		    'logstashHealth': logstashHealth, #done
+		    'diskUsage': diskUsage, #done
+		    'memAvailable': memUsage['available'], #done
+		    'memConsumed': memUsage['consumed'], #done
+		    'memPercent': memUsage['percentUsed']} #done
+	server.healthCheck(healthInfo)

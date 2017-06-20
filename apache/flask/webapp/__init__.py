@@ -152,7 +152,7 @@ def create_app():
             es.update(esService, body, 'sweet_security', 'devices', deviceInfo['hits']['hits'][0]['_id'])
             return jsonify(status="Success", reason="Device updated")
         else:
-            es.consolidate(mac,esService)
+            es.consolidate(mac,esService,'devices')
             return jsonify(status="Warning", reason="Multiple devices consolidated. Next update will update device")
 
     @app.route('/renameDevice', methods=['POST'])
@@ -193,7 +193,7 @@ def create_app():
             flash(u'Device renamed', 'success')
             return redirect('/')
         else:
-            es.consolidate(mac,esService)
+            es.consolidate(mac,esService,'devices')
             sleep(1)
             deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
             import cgi
@@ -257,7 +257,7 @@ def create_app():
         else:
             serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
             serverIP = serverIP[0]
-            es.consolidate(mac,esService)
+            es.consolidate(mac,esService,'devices')
             sleep(1)
             deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
             for hit in deviceInfo['hits']['hits']:
@@ -426,7 +426,7 @@ def create_app():
         else:
             #This happens when the web component is still booting up and the ES index hasn't initialized
             #Sometimes we get two devices, we'll delete the old one and let the sensor send info on it's next update
-            es.consolidate(mac,esService)
+            es.consolidate(mac,esService,'devices')
             #sleep for one second, otherwise ES doesn't have enough time to delete the duplicated record
             sleep(1)
             return redirect('/device/%s' % mac)
@@ -483,7 +483,7 @@ def create_app():
                 flash(u'Device updated', 'success')
                 return redirect('/')
             else:
-                es.consolidate(mac,esService)
+                es.consolidate(mac,esService,'devices')
                 sleep(1)
                 deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
                 for hit in deviceInfo['hits']['hits']:
@@ -649,130 +649,161 @@ def create_app():
                 deviceList.append(deviceInfo)
         return jsonify(deviceList=deviceList)
 
+    @app.route('/sensorHealth', methods=['POST'])
+    def sensorHealth():
+        sensorMac = ''
+        sensorHostname = ''
+        broHealth = ''
+        logstashHealth = ''
+        diskUsage = 0
+        memConsumed = 0
+        memAvailable = 0
+        memPercent = 0
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "sensorMac":
+                    sensorMac = request.form['sensorMac']
+                if key == "sensorName":
+                    sensorName = request.form['sensorName']
+                if key == "broHealth":
+                    broHealth = request.form['broHealth']
+                if key == "logstashHealth":
+                    logstashHealth = request.form['logstashHealth']
+                if key == "diskUsage":
+                    diskUsage = request.form['diskUsage']
+                if key == "memConsumed":
+                    memConsumed = request.form['memConsumed']
+                if key == "memAvailable":
+                    memAvailable = request.form['memAvailable']
+                if key == "memPercent":
+                    memPercent = request.form['memPercent']
+        if len(sensorMac) == 0:
+            print "unknown sensor mac"
+            flash(u'Unknown Sensor MAC', 'error')
+            return redirect('/')
+        if len(sensorName) == 0:
+            print "unknown sensor"
+            flash(u'Unknown Sensor Name', 'error')
+            return redirect('/settings')
+        if len(broHealth) == 0:
+            print "unknown bro health"
+            flash(u'Unknown Bro Health', 'error')
+            return redirect('/settings')
+        if len(logstashHealth) == 0:
+            print "unknown logstash health"
+            flash(u'Unknown Logstash Health', 'error')
+            return redirect('/settings')
+        if len(diskUsage) == 0:
+            print "unknown diskUsage"
+            flash(u'Unknown Disk Usage', 'error')
+            return redirect('/settings')
+        if len(memConsumed) == 0:
+            print "unknown memConsumed"
+            flash(u'Unknown Memory Consumed', 'error')
+            return redirect('/settings')
+        if len(memAvailable) == 0:
+            print "unknown memAvailable"
+            flash(u'Unknown Memory Available', 'error')
+            return redirect('/settings')
+        if len(memPercent) == 0:
+            print "unknown memPercent"
+            flash(u'Unknown Memory Percent', 'error')
+            return redirect('/settings')
+        healthInfo = {'mac': sensorMac,
+                      'sensorName': sensorName,
+                      'broHealth': broHealth,
+                      'logstashHealth': logstashHealth,
+                      'diskUsage': diskUsage,
+                      'memAvailable': memAvailable,
+                      'memConsumed': memConsumed,
+                      'memPercent': memPercent,
+                      'firstSeen': str(int(round(time.time() * 1000))),
+                      'lastSeen': str(int(round(time.time() * 1000)))}
+        sensorStatus = 'Unknown'
+        sensorQuery = {"query": {"match_phrase": {"mac": {"query": sensorMac}}}}
+        sensorInfo = es.search(esService, sensorQuery, 'sweet_security', 'sensors')
+        if sensorInfo is None:
+            # First Ever Device
+            sensorStatus = 'First Ever'
+            es.write(esService, healthInfo, 'sweet_security', 'sensors')
+            # emailBody = render_template('emails/addDevice.html', deviceInfo=newDeviceData, serverIP=serverIP)
+            # email.emailUser(mail,"New Device Found",recipient,emailBody)
+        elif len(sensorInfo['hits']['hits']) == 0:
+            # newDevice
+            sensorStatus = 'New Sensor'
+            es.write(esService, healthInfo, 'sweet_security', 'sensors')
+            # emailBody = render_template('emails/addDevice.html', deviceInfo=newDeviceData, serverIP=serverIP)
+            # email.emailUser(mail,"New Device Found",recipient,emailBody)
+        elif len(sensorInfo['hits']['hits']) == 1:
+            # update Sensor
+            body = {'doc': {'lastSeen': str(int(round(time.time() * 1000)))}}
+            es.update(esService, body, 'sweet_security', 'sensors', sensorInfo['hits']['hits'][0]['_id'])
+            sensorStatus = 'Update Sensor'
+        else:
+            # need to consolidate then update
+            sensorStatus = 'Consolidate Sensors'
+            es.consolidate(sensorMac, esService, 'sensors')
+        return jsonify(healthInfo=healthInfo, sensorStatus=sensorStatus)
+
     @app.route('/settings')
     def settings():
-        #So we can link to kibana
-        serverIP=re.search(r'^https?://([\w\d\.\-]+)',request.url).groups()
-        serverIP=serverIP[0]
-        elasticHealth=os.popen('service elasticsearch status').read()
+        # So we can link to kibana
+        serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+        serverIP = serverIP[0]
+        elasticHealth = os.popen('service elasticsearch status').read()
         for line in elasticHealth.splitlines():
             if line.lstrip().startswith('Active: '):
                 if line.lstrip().startswith('Active: active (running)'):
-                    elasticHealth='Started'
+                    elasticHealth = 'Started'
                 else:
-                    elasticHealth='Stopped'
-        
-        if os.path.isfile('/usr/share/logstash/bin/logstash'):
-            logstashHealth=os.popen('service logstash status').read()
-            for line in logstashHealth.splitlines():
-                if line.lstrip().startswith('Active: '):
-                    if line.lstrip().startswith('Active: active (running)'):
-                        logstashHealth='Started'
-                    else:
-                        logstashHealth='Stopped'
-        else:
-            logstashHealth='not available'
-        kibanaHealth=os.popen('service kibana status').read()
+                    elasticHealth = 'Stopped'
+        kibanaHealth = os.popen('service kibana status').read()
         for line in kibanaHealth.splitlines():
             if line.lstrip().startswith('Active: '):
                 if line.lstrip().startswith('Active: active (running)'):
-                    kibanaHealth='Started'
+                    kibanaHealth = 'Started'
                 else:
-                    kibanaHealth='Stopped'
+                    kibanaHealth = 'Stopped'
 
-        if os.path.isfile('/opt/nsm/bro/bin/broctl'):
-            broStatus='stopped'
-            broHealth=os.popen('sudo /opt/nsm/bro/bin/broctl status').read()
-            broLine=0
-            for line in broHealth.splitlines():
-                if broLine == 1:
-                    broStatus=line.split()[3]
-                broLine+=1
-        else:
-            broStatus="not available"
-
-        if os.path.isfile('/opt/SweetSecurity/sweetSecurity.py'):
-            ssHealth=os.popen('service sweetsecurity status').read()
-            for line in ssHealth.splitlines():
-                if line.lstrip().startswith('Active: '):
-                    if line.lstrip().startswith('Active: active (running)'):
-                        ssHealth='Started'
-                    else:
-                        ssHealth='Stopped'
-        else:
-            ssHealth="not available"
-
-        diskUsage=0
-        diskUsageCommand=os.popen('df -k "/"').read()
+        diskUsage = 0
+        diskUsageCommand = os.popen('df -k "/"').read()
         for line in diskUsageCommand.splitlines():
             line = line.split()
             if line[0] != 'Filesystem':
-                diskUsage=int(line[4][:-1])
+                diskUsage = int(line[4][:-1])
 
-        memUsage={'available': 0, 'consumed': 0, 'percentUsed': 0}
-        memInfo=os.popen('free -t -m').read()
+        memUsage = {'available': 0, 'consumed': 0, 'percentUsed': 0}
+        memInfo = os.popen('free -t -m').read()
         for line in memInfo.splitlines():
             if line.rstrip().startswith('Mem:'):
-                memUsage['available']=line.split()[1]
-                memUsage['consumed']=line.split()[2]
-                memUsage['percentUsed']=int(round((float(line.split()[2]) / float(line.split()[1])) * 100,0))
-        
-        #Get the system status info for every sensor sending data
-        sensorInfo=[]
-        sensorQuery={"query":{"exists":{"field":"logstashHealth"}},"size":0,"aggs":{"distinct_hosts":{"terms":{"field":"host.keyword"}}}}
-        
-        sensorHostData=es.search(esService, sensorQuery, 'logstash-*', 'logs')
-        if len(sensorHostData['hits']['hits']) > 0:
-            for sensor in sensorHostData['aggregations']['distinct_hosts']['buckets']:
-                lsHealthQuery={"sort":[{ "@timestamp" : {"order" : "desc"}}],"query": {"bool":{"must":[{"exists":{"field":"logstashHealth"}},{"term":{"host.keyword":sensor['key']}}]}}}
-                lsHealthData=es.search(esService, lsHealthQuery, 'logstash-*', 'logs')
-                
-                broHealthQuery={"sort":[{ "@timestamp" : {"order" : "desc"}}],"query":{"bool":{"must":[{"exists":{"field":"broHealth"}},{"term":{"host.keyword":sensor['key']}}]}}}
-                broHealthData=es.search(esService, broHealthQuery, 'logstash-*', 'logs')
-                
-                diskUsageQuery={"sort":[{ "@timestamp" : {"order" : "desc"}}],"query":{"bool":{"must":[{"exists":{"field":"diskUsage"}},{"term":{"host.keyword": sensor['key']}}]}}}
-                diskUsageData=es.search(esService, diskUsageQuery, 'logstash-*', 'logs')
-                
-                memUsageQuery={"sort":[{ "@timestamp" : {"order" : "desc"}}],"query":{"bool":{"must":[{"exists":{"field":"memAvailable"}},{"term":{"host.keyword":sensor['key']}}]}}}
-                memUsageData=es.search(esService, memUsageQuery, 'logstash-*', 'logs')
-                
-                sensorDiskUsage=0
-                memInstalled=0
-                memConsumed=0
-                memPercent=0
-                broStatus='Unknown'
-                logstashStatus='Unknown'
-                time='Unknown'
-                if len(lsHealthData['hits']['hits']) > 0:
-                    time=lsHealthData['hits']['hits'][0]['_source']['@timestamp']
-                    logstashStatus=lsHealthData['hits']['hits'][0]['_source']['logstashHealth']
-                if len(broHealthData['hits']['hits']) > 0:
-                    time=broHealthData['hits']['hits'][0]['_source']['@timestamp']
-                    broStatus=broHealthData['hits']['hits'][0]['_source']['broHealth']
-                if len(diskUsageData['hits']['hits']) > 0:
-                    time=diskUsageData['hits']['hits'][0]['_source']['@timestamp']
-                    sensorDiskUsage=diskUsageData['hits']['hits'][0]['_source']['diskUsage']
-                if len(memUsageData['hits']['hits']) > 0:
-                    time=memUsageData['hits']['hits'][0]['_source']['@timestamp']
-                    memInstalled=memUsageData['hits']['hits'][0]['_source']['memAvailable']
-                    memConsumed=memUsageData['hits']['hits'][0]['_source']['memConsumed']
-                    memPercent=memUsageData['hits']['hits'][0]['_source']['memPercentUsed']
-                time=datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%fZ')
-                timeSince=datetime.datetime.utcnow()-time
-                systemInfo={
-                'time': time,
-                'timeSince': int(timeSince.seconds / 60.0),
-                'sensorName': sensor['key'],
-                'logstash': logstashStatus,
-                'broStatus': broStatus,
-                'diskUsage': int(sensorDiskUsage),
-                'memInstalled': int(memInstalled),
-                'memConsumed': int(memConsumed),
-                'memPercent': int(memPercent)
+                memUsage['available'] = line.split()[1]
+                memUsage['consumed'] = line.split()[2]
+                memUsage['percentUsed'] = int(round((float(line.split()[2]) / float(line.split()[1])) * 100, 0))
+
+        # Get the system status info for every sensor sending data
+        sensorInfo = []
+        matchAll = {"query": {"match_all": {}}}
+        allSensors = es.search(esService, matchAll, 'sweet_security', 'sensors')
+        if allSensors is not None:
+            for sensor in allSensors['hits']['hits']:
+                lastSeenTime = int(sensor['_source']['lastSeen']) / 1000
+                timeSince = (int(datetime.datetime.now().strftime("%s")) * 1000) - int(sensor['_source']['lastSeen'])
+                systemInfo = {
+                    'time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastSeenTime)),
+                    'timeSince': int(timeSince / 1000) / 60,
+                    'sensorName': sensor['_source']['sensorName'],
+                    'logstash': sensor['_source']['logstashHealth'],
+                    'broStatus': sensor['_source']['broHealth'],
+                    'diskUsage': int(sensor['_source']['diskUsage']),
+                    'memInstalled': int(sensor['_source']['memAvailable']),
+                    'memConsumed': int(sensor['_source']['memConsumed']),
+                    'memPercent': int(sensor['_source']['memPercent'])
                 }
                 sensorInfo.append(systemInfo)
-        
-        return render_template('settings.html',serverIP=serverIP,esHealth=elasticHealth,kHealth=kibanaHealth,diskUsage=diskUsage,memUsage=memUsage,sensorInfo=sensorInfo)
+
+        return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
+                               diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo)
 
     @app.route('/settings/manageService', methods=['POST'])
     def settingsManageService():
@@ -805,30 +836,25 @@ def create_app():
                 return "unknown action"
         return "unknown service"
 
-
     @app.route('/deleteSensor', methods=['POST'])
     def deleteSensor():
-        sensorName=''
+        sensorMac = ''
         f = request.form
         for key in f.keys():
             for value in f.getlist(key):
-                if key == "sensorName":
-                     sensorName=request.form['sensorName']
-        if len(sensorName)==0:
+                if key == "sensorMac":
+                    sensorMac = request.form['sensorMac']
+        if len(sensorMac) == 0:
             print "unknown sensor"
             flash(u'Unknown Sensor Name', 'error')
             return redirect('/settings')
         sensorInfo = []
-        sensorQuery = {"query": {"bool": {"must": [{"exists": {"field": "logstashHealth"}}, {"match": {"host": sensorName}}]}}}
-        sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs')
-        docCount = sensorHostData['hits']['total']
-        sensorHostData = es.search(esService, sensorQuery, 'logstash-*', 'logs', docCount)
+        sensorQuery = {"query": {"match_phrase": {"mac": {"query": sensorMac}}}}
+        sensorHostData = es.search(esService, sensorQuery, 'sweet_security', 'sensors')
         for sensor in sensorHostData['hits']['hits']:
-            es.delete(esService, sensor['_index'], 'logs', sensor['_id'])
+            es.delete(esService, sensor['_index'], 'sensors', sensor['_id'])
         flash(u'Sensor Deleted')
         return redirect('/settings')
-
-
 
     @app.route('/consolidateDevices')
     def consolidateDevices():
@@ -836,7 +862,7 @@ def create_app():
         allDevices=es.search(esService, matchAll, 'sweet_security', 'devices')
         if allDevices is not None:
             for host in allDevices['hits']['hits']:
-                es.consolidate(host['_source']['mac'],esService)
+                es.consolidate(host['_source']['mac'],esService,'devices')
         flash(u'Devices Consolidated', 'success')
         return redirect('/settings')
 

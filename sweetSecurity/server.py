@@ -79,3 +79,23 @@ def getConfig():
 		response = urllib2.urlopen(req)
 	result=response.read()
 	return result
+
+def healthCheck(healthInfo):
+	userCreds=getCreds()
+	address=userCreds['address']
+	username=userCreds['user']
+	password=userCreds['pass']
+	webCert=userCreds['webCert']
+	url = 'https://%s/sensorHealth' % address
+	csrfUrl = 'https://%s/csrf' % address
+	session = requests.Session()
+	session.auth = (username, password)
+	if webCert == 'development':
+		auth = session.get(csrfUrl, verify=False)
+		healthInfo['csrf_token']=auth.content
+		response=session.post(url,data=healthInfo, verify=False, headers={"referer": url})
+	else:
+		auth = session.get(csrfUrl, verify=False)
+		healthInfo['csrf_token']=auth.content
+		response=session.post(url ,data=healthInfo, verify=False, headers={"referer": url })
+	return response

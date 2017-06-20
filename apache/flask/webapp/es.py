@@ -29,10 +29,10 @@ def compare(d1,d2):
 	compared = {o : (d1[o], d2[o]) for o in intersect_keys if d1[o] != d2[o]}
 	return compared
 
-def consolidate(mac,es):
+def consolidate(mac,es,type):
 	device1={}
 	deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
-	deviceInfo=search(es, deviceQuery, 'sweet_security', 'devices')
+	deviceInfo=search(es, deviceQuery, 'sweet_security', type)
 	for device in deviceInfo['hits']['hits']:
 		if len(device1) > 0:
 			modifiedInfo = compare(device1['_source'],device['_source'])
@@ -41,5 +41,7 @@ def consolidate(mac,es):
 				deleteID=device['_id']
 			else:
 				deleteID=device1['_id']
-			delete(es,'sweet_security','devices',deleteID)
+			delete(es,'sweet_security',type,deleteID)
 		device1=device
+
+
