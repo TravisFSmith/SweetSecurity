@@ -853,7 +853,9 @@ def create_app():
         sensorHostData = es.search(esService, sensorQuery, 'sweet_security', 'sensors')
         for sensor in sensorHostData['hits']['hits']:
             es.delete(esService, sensor['_index'], 'sensors', sensor['_id'])
-        flash(u'Sensor Deleted')
+        #Sleep so the reload will show OK
+        sleep(1)
+        flash(u'Sensor Deleted', 'success')
         return redirect('/settings')
 
     @app.route('/consolidateDevices')
