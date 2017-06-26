@@ -1,0 +1,103 @@
+[
+  {
+    "_id": "10215c90-206f-11e7-8a84-6b8de0ad70e4",
+    "_type": "dashboard",
+    "_source": {
+      "title": "Sweet Security",
+      "hits": 0,
+      "description": "",
+      "panelsJSON": "[{\"col\":1,\"id\":\"3f7aa7c0-2151-11e7-9090-79f4d0e1bbea\",\"panelIndex\":1,\"row\":5,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"51b196b0-2151-11e7-9090-79f4d0e1bbea\",\"panelIndex\":2,\"row\":5,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"a55702a0-2151-11e7-9090-79f4d0e1bbea\",\"panelIndex\":3,\"row\":8,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"616a70d0-2152-11e7-9a78-378ae9e36f85\",\"panelIndex\":4,\"row\":8,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"size_x\":12,\"size_y\":2,\"panelIndex\":5,\"type\":\"visualization\",\"id\":\"3efb7ac0-2153-11e7-9cc9-d548f0e513c4\",\"col\":1,\"row\":1},{\"size_x\":12,\"size_y\":2,\"panelIndex\":6,\"type\":\"visualization\",\"id\":\"a72c96e0-215a-11e7-80e3-d719e2f2d249\",\"col\":1,\"row\":3}]",
+      "optionsJSON": "{\"darkTheme\":false}",
+      "uiStateJSON": "{\"P-3\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-4\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}}",
+      "version": 1,
+      "timeRestore": false,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}]}"
+      }
+    }
+  },
+  {
+    "_id": "3efb7ac0-2153-11e7-9cc9-d548f0e513c4",
+    "_type": "visualization",
+    "_source": {
+      "title": "logstash_deviceScanned",
+      "visState": "{\"title\":\"logstash_deviceScanned\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"defaultYExtents\":false,\"legendPosition\":\"right\",\"mode\":\"stacked\",\"scale\":\"linear\",\"setYExtents\":false,\"times\":[]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"mac.keyword\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"path.keyword:\\\"/var/log/sweetsecurity.log\\\" AND \\\"Device Scanned\\\"\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "3f7aa7c0-2151-11e7-9090-79f4d0e1bbea",
+    "_type": "visualization",
+    "_source": {
+      "title": "sweetsecurity_Mac2Port",
+      "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"4\",\"params\":{\"field\":\"mac.keyword\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":20},\"schema\":\"segment\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"field\":\"port.keyword\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":30},\"schema\":\"segment\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"legendPosition\":\"right\"},\"title\":\"sweetsecurity_Mac2Port\",\"type\":\"pie\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"sweet_security\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "51b196b0-2151-11e7-9090-79f4d0e1bbea",
+    "_type": "visualization",
+    "_source": {
+      "title": "sweetsecurity_Port2Mac",
+      "visState": "{\"title\":\"sweetsecurity_Port2Mac\",\"type\":\"pie\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"port.keyword\",\"size\":30,\"order\":\"desc\",\"orderBy\":\"1\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"mac.keyword\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"sweet_security\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "a55702a0-2151-11e7-9090-79f4d0e1bbea",
+    "_type": "visualization",
+    "_source": {
+      "title": "sweetsecurity_deviceTable",
+      "visState": "{\n  \"title\": \"sweetsecurity_deviceTable\",\n  \"type\": \"table\",\n  \"params\": {\n    \"perPage\": 10,\n    \"showPartialRows\": false,\n    \"showMeticsAtAllLevels\": false,\n    \"sort\": {\n      \"columnIndex\": null,\n      \"direction\": null\n    },\n    \"showTotal\": false,\n    \"totalFunc\": \"sum\"\n  },\n  \"aggs\": [\n    {\n      \"id\": \"1\",\n      \"enabled\": true,\n      \"type\": \"count\",\n      \"schema\": \"metric\",\n      \"params\": {}\n    },\n    {\n      \"id\": \"2\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"nickname.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Nickname\"\n      }\n    },\n    {\n      \"id\": \"3\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"hostname.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Hostname\"\n      }\n    },\n    {\n      \"id\": \"4\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"ip4.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"IP Address\"\n      }\n    },\n    {\n      \"id\": \"5\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"mac.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"MAC Address\"\n      }\n    }\n  ],\n  \"listeners\": {}\n}",
+      "uiStateJSON": "{\n  \"vis\": {\n    \"params\": {\n      \"sort\": {\n        \"columnIndex\": null,\n        \"direction\": null\n      }\n    }\n  }\n}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\n  \"index\": \"sweet_security\",\n  \"query\": {\n    \"query_string\": {\n      \"query\": \"_type:\\\"devices\\\"\",\n      \"analyze_wildcard\": true\n    }\n  },\n  \"filter\": []\n}"
+      }
+    }
+  },
+  {
+    "_id": "616a70d0-2152-11e7-9a78-378ae9e36f85",
+    "_type": "visualization",
+    "_source": {
+      "title": "sweetsecurity_portTable",
+      "visState": "{\n  \"title\": \"sweetsecurity_portTable\",\n  \"type\": \"table\",\n  \"params\": {\n    \"perPage\": 10,\n    \"showPartialRows\": true,\n    \"showMeticsAtAllLevels\": false,\n    \"sort\": {\n      \"columnIndex\": null,\n      \"direction\": null\n    },\n    \"showTotal\": false,\n    \"totalFunc\": \"sum\"\n  },\n  \"aggs\": [\n    {\n      \"id\": \"1\",\n      \"enabled\": true,\n      \"type\": \"count\",\n      \"schema\": \"metric\",\n      \"params\": {}\n    },\n    {\n      \"id\": \"2\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"mac.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"MAC Address\"\n      }\n    },\n    {\n      \"id\": \"3\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"port.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Port\"\n      }\n    },\n    {\n      \"id\": \"5\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"protocol.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Protocol\"\n      }\n    },\n    {\n      \"id\": \"4\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"product.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Product\"\n      }\n    },\n    {\n      \"id\": \"6\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"vendor.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Vendor\"\n      }\n    },\n    {\n      \"id\": \"7\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"version.keyword\",\n        \"size\": 20,\n        \"order\": \"desc\",\n        \"orderBy\": \"1\",\n        \"customLabel\": \"Version\"\n      }\n    }\n  ],\n  \"listeners\": {}\n}",
+      "uiStateJSON": "{\n  \"vis\": {\n    \"params\": {\n      \"sort\": {\n        \"columnIndex\": null,\n        \"direction\": null\n      }\n    }\n  }\n}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\n  \"index\": \"sweet_security\",\n  \"query\": {\n    \"query_string\": {\n      \"query\": \"_type:\\\"ports\\\"\",\n      \"analyze_wildcard\": true\n    }\n  },\n  \"filter\": []\n}"
+      }
+    }
+  },
+  {
+    "_id": "a72c96e0-215a-11e7-80e3-d719e2f2d249",
+    "_type": "visualization",
+    "_source": {
+      "title": "logstash_spoofDeviceTimeline",
+      "visState": "{\"title\":\"logstash_spoofDeviceTimeline\",\"type\":\"histogram\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"scale\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"mac.keyword\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query_string\":{\"query\":\"path.keyword:\\\"/var/log/sweetsecurity.log\\\" AND \\\"Spoofing Device\\\"\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  }
+]
