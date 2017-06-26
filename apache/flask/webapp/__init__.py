@@ -14,13 +14,6 @@ import email
 import es
 import validators
 
-#These are the values for when a new device is found.
-#1 means device is ignored, 0 means device is monitored
-defaultMonitorAction='1'
-#1 means device is isolated, 0 means device can access any local resource
-defaultIsolateAction='0'
-#Values can be ACCEPT or DROP
-defaultFwAction='ACCEPT'
 
 class ConfigClass(object):
 __appSettings__
@@ -75,33 +68,33 @@ def create_app():
                 deviceList.append(deviceInfo)
         return render_template('index.html', serverIP=serverIP, deviceList=deviceList)
 
-    @app.route('/addDevice', methods=['POST','GET'])
+    @app.route('/addDevice', methods=['POST', 'GET'])
     def addDevice():
-        if request.method=='GET':
+        if request.method == 'GET':
             return render_template('csrf.html')
-        hostname=''
-        ip=''
-        mac=''
-        vendor=''
-        #ignored='None'
+        hostname = ''
+        ip = ''
+        mac = ''
+        vendor = ''
+        # ignored='None'
         f = request.form
         for key in f.keys():
             for value in f.getlist(key):
                 if key == "key":
-                    apiKey=request.form['key']
+                    apiKey = request.form['key']
                 if key == "hostname":
-                    hostname=request.form['hostname']
+                    hostname = request.form['hostname']
                 if key == "ip":
-                    ip=request.form['ip']
+                    ip = request.form['ip']
                 if key == "macAddress":
-                    mac=request.form['macAddress']
-                    #Convert mac to uppercase alphanumeric
-                    mac=validators.convertMac(mac)
+                    mac = request.form['macAddress']
+                    # Convert mac to uppercase alphanumeric
+                    mac = validators.convertMac(mac)
                 if key == "vendor":
-                    vendor=request.form['vendor']
-                #if key == "ignored":
-                #    ignored=request.form['ignored']
-        if len(mac)==0:
+                    vendor = request.form['vendor']
+                    # if key == "ignored":
+                    #    ignored=request.form['ignored']
+        if len(mac) == 0:
             return jsonify(status="Error", reason="Must Supply MAC Address")
         if validators.macAddress(mac) == False:
             return jsonify(status="Error", reason="Invalid MAC Address")
@@ -109,50 +102,78 @@ def create_app():
             return jsonify(status="Error", reason="Invalid IP Address")
         if len(hostname) > 0 and validators.hostname(hostname) == False:
             return jsonify(status="Error", reason="Invalid Hostname")
-        #if ignored != "None" and validators.ignoreStatus(ignored) == False:
+        # if ignored != "None" and validators.ignoreStatus(ignored) == False:
         #    return jsonify(status="Error", reason="Invalid Ignore Status")
-        newDeviceData={'hostname': hostname,
-                    'nickname': hostname,
-                    'ip4': ip,
-                    'mac': mac,
-                    'vendor': vendor,
-                    'ignore': defaultMonitorAction,
-                    'defaultFwAction': defaultFwAction,
-                    'isolate': defaultIsolateAction,
-                    'firstSeen': str(int(round(time.time() * 1000))),
-                    'lastSeen': str(int(round(time.time() * 1000)))}
-        deviceQuery = {"query": {"match_phrase": {"mac": { "query": mac }}}}
-        deviceInfo=es.search(esService, deviceQuery, 'sweet_security', 'devices')
+        # Get Configuration Settings
+        matchAll = {"query": {"match_all": {}}}
+        ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+        if ssConfig is None:
+            print "Error: configuration not found"
+            return "Error: configuration not found"
+        elif len(ssConfig['hits']['hits']) == 0:
+            print "Error: configuration not found"
+            return "Error: configuration not found"
+            # configData={'defaultMonitor': 0, 'defaultIsolate': 0, 'defaultFW': 0, 'defaultLogRetention': 0}
+            # es.write(esService, configData, 'sweet_security', 'configuration')
+
+        defaultMonitorAction = 0
+        defaultIsolateAction = 0
+        defaultFwAction = 0
+        # Get Configuration Settings
+        matchAll = {"query": {"match_all": {}}}
+        ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+        if ssConfig is not None:
+            for config in ssConfig['hits']['hits']:
+                defaultMonitorAction = config['_source']['defaultMonitor']
+                defaultIsolateAction = config['_source']['defaultIsolate']
+                defaultFwAction = config['_source']['defaultFW']
+        if defaultFwAction == 1:
+            defaultFwAction = 'ACCEPT'
+        else:
+            defaultFwAction = 'DROP'
+        newDeviceData = {'hostname': hostname,
+                         'nickname': hostname,
+                         'ip4': ip,
+                         'mac': mac,
+                         'vendor': vendor,
+                         'ignore': defaultMonitorAction,
+                         'defaultFwAction': defaultFwAction,
+                         'isolate': defaultIsolateAction,
+                         'firstSeen': str(int(round(time.time() * 1000))),
+                         'lastSeen': str(int(round(time.time() * 1000)))}
+        deviceQuery = {"query": {"match_phrase": {"mac": {"query": mac}}}}
+        deviceInfo = es.search(esService, deviceQuery, 'sweet_security', 'devices')
         serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
         serverIP = serverIP[0]
         if deviceInfo is None:
-            #First ever device...
+            # First ever device...
             es.write(esService, newDeviceData, 'sweet_security', 'devices')
             emailBody = render_template('emails/addDevice.html', deviceInfo=newDeviceData, serverIP=serverIP)
-            email.emailUser(mail,"New Device Found",recipient,emailBody)
+            email.emailUser(mail, "New Device Found", recipient, emailBody)
             return jsonify(status="Success", reason="Device added")
         elif len(deviceInfo['hits']['hits']) == 0:
-            #New Device
+            # New Device
             es.write(esService, newDeviceData, 'sweet_security', 'devices')
             emailBody = render_template('emails/addDevice.html', deviceInfo=newDeviceData, serverIP=serverIP)
-            email.emailUser(mail,"New Device Found",recipient,emailBody)
+            email.emailUser(mail, "New Device Found", recipient, emailBody)
             return jsonify(status="Success", reason="Device added")
         elif len(deviceInfo['hits']['hits']) == 1:
             if deviceInfo['hits']['hits'][0]['_source']['hostname'] != newDeviceData['hostname']:
-                body = {'doc' : {'hostname': newDeviceData['hostname']}}
+                body = {'doc': {'hostname': newDeviceData['hostname']}}
                 es.update(esService, body, 'sweet_security', 'devices', deviceInfo['hits']['hits'][0]['_id'])
-                #If user hasn't updated the nickname, update that too
-                if deviceInfo['hits']['hits'][0]['_source']['hostname'] == deviceInfo['hits']['hits'][0]['_source']['nickname']:
-                    body = {'doc' : {'nickname': newDeviceData['hostname']}}
-                    es.update(esService, body, 'sweet_security', 'devices', deviceInfo['hits']['hits'][0]['_id'])                    
+                # If user hasn't updated the nickname, update that too
+                if deviceInfo['hits']['hits'][0]['_source']['hostname'] == deviceInfo['hits']['hits'][0]['_source'][
+                    'nickname']:
+                    body = {'doc': {'nickname': newDeviceData['hostname']}}
+                    es.update(esService, body, 'sweet_security', 'devices', deviceInfo['hits']['hits'][0]['_id'])
             if deviceInfo['hits']['hits'][0]['_source']['ip4'] != newDeviceData['ip4']:
-                body = {'doc' : {'ip4': newDeviceData['ip4']}}
+                body = {'doc': {'ip4': newDeviceData['ip4']}}
                 es.update(esService, body, 'sweet_security', 'devices', deviceInfo['hits']['hits'][0]['_id'])
-            body = {'doc' : {'lastSeen': str(int(round(time.time() * 1000)))}}
+            body = {'doc': {'lastSeen': str(int(round(time.time() * 1000)))}}
             es.update(esService, body, 'sweet_security', 'devices', deviceInfo['hits']['hits'][0]['_id'])
             return jsonify(status="Success", reason="Device updated")
         else:
-            es.consolidate(mac,esService,'devices')
+            es.consolidate(mac, esService, 'devices')
             return jsonify(status="Warning", reason="Multiple devices consolidated. Next update will update device")
 
     @app.route('/renameDevice', methods=['POST'])
@@ -781,6 +802,20 @@ def create_app():
                 memUsage['consumed'] = line.split()[2]
                 memUsage['percentUsed'] = int(round((float(line.split()[2]) / float(line.split()[1])) * 100, 0))
 
+        defaultMonitor = 0
+        defaultIsolate = 0
+        defaultFW = 0
+        defaultLogRetention = 0
+        # Get Configuration Settings
+        matchAll = {"query": {"match_all": {}}}
+        ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+        if ssConfig is not None:
+            for config in ssConfig['hits']['hits']:
+                defaultMonitor = config['_source']['defaultMonitor']
+                defaultIsolate = config['_source']['defaultIsolate']
+                defaultFW = config['_source']['defaultFW']
+                defaultLogRetention = config['_source']['defaultLogRetention']
+
         # Get the system status info for every sensor sending data
         sensorInfo = []
         matchAll = {"query": {"match_all": {}}}
@@ -804,7 +839,100 @@ def create_app():
                 sensorInfo.append(systemInfo)
 
         return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
-                               diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo)
+                               diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo, defaultFW=defaultFW,
+                               defaultIsolate=defaultIsolate, defaultMonitor=defaultMonitor,
+                               defaultLogRetention=defaultLogRetention)
+
+    @app.route('/settings/modify', methods=['POST'])
+    def settingsModify():
+        settingID=''
+        setting=''
+        value=''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "setting":
+                     setting=request.form['setting']
+                if key == "value":
+                     value=request.form['value']
+        if setting == 'monitor':
+            matchAll = {"query": {"match_all": {}}}
+            ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+            if ssConfig is not None:
+                for config in ssConfig['hits']['hits']:
+                    settingID=config['_id']
+            if value == 'Yes':
+                body = {'doc' : {'defaultMonitor': 0}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == 'No':
+                body = {'doc' : {'defaultMonitor': 1}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            else:
+                return "Unknown value"
+            sleep(1)
+            return "Default monitor changed"
+        if setting == 'isolate':
+            matchAll = {"query": {"match_all": {}}}
+            ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+            if ssConfig is not None:
+                for config in ssConfig['hits']['hits']:
+                    settingID=config['_id']
+            if value == 'Yes':
+                body = {'doc' : {'defaultIsolate': 1}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == 'No':
+                body = {'doc' : {'defaultIsolate': 0}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            else:
+                return "Unknown value"
+            sleep(1)
+            return "Default isolate changed"
+        if setting == 'fw':
+            matchAll = {"query": {"match_all": {}}}
+            ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+            if ssConfig is not None:
+                for config in ssConfig['hits']['hits']:
+                    settingID=config['_id']
+            if value == 'Allow':
+                body = {'doc' : {'defaultFW': 1}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == 'Block':
+                body = {'doc' : {'defaultFW': 0}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            else:
+                return "Unknown value"
+            sleep(1)
+            return "Default fw changed"
+        if setting == 'logRetention':
+            matchAll = {"query": {"match_all": {}}}
+            ssConfig = es.search(esService, matchAll, 'sweet_security', 'configuration')
+            if ssConfig is not None:
+                for config in ssConfig['hits']['hits']:
+                    settingID=config['_id']
+            if value == '7':
+                body = {'doc' : {'defaultLogRetention': 7}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == '14':
+                body = {'doc' : {'defaultLogRetention': 14}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == '30':
+                body = {'doc' : {'defaultLogRetention': 30}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == '90':
+                body = {'doc' : {'defaultLogRetention': 90}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == '180':
+                body = {'doc' : {'defaultLogRetention': 180}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            elif value == '0':
+                body = {'doc' : {'defaultLogRetention': 0}}
+                es.update(esService, body, 'sweet_security', 'configuration', settingID)
+            else:
+                return "Unknown value"
+            sleep(1)
+        else:
+            return "Unknown setting"
+        return "Settings Modified"
 
     @app.route('/settings/manageService', methods=['POST'])
     def settingsManageService():

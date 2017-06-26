@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <!- Refresh Page Every 5 Seconds ->
-<meta http-equiv="refresh" content="5" >
+<!- meta http-equiv="refresh" content="5" ->
 <section>
 	<div class="container">
 		<div class="panel-group">
@@ -41,6 +41,37 @@
 							</div>
 						</div>
 					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Monitor New Devices:</strong></div>
+						<div class="col-xs-7">
+							<select id="defaultMonitor" onChange=settingsChange("monitor")>
+								<option value="Yes"{% if defaultMonitor==0 %} selected="selected"{% endif %}>Yes</option>
+								<option value="No"{% if defaultMonitor==1 %} selected="selected"{% endif %}>No</option>
+							</select>
+						</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Isolate New Devices:</strong></div>
+						<div class="col-xs-7">
+							<select id="defaultIsolate" onChange=settingsChange("isolate")>
+								<option value="Yes"{% if defaultIsolate==1 %} selected="selected"{% endif %}>Yes</option>
+								<option value="No"{% if defaultIsolate==0 %} selected="selected"{% endif %}>No</option>
+							</select>
+						</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>New Device Firewall Action:</strong></div>
+						<div class="col-xs-7">
+							<select id="defaultFW" onChange=settingsChange("fw")>
+								<option value="Allow"{% if defaultFW==1 %} selected="selected"{% endif %}>Allow</option>
+								<option value="Block"{% if defaultFW==0 %} selected="selected"{% endif %}>Block</option>
+							</select>
+						</div>
+					</div>
+					<br />
 				</div>
 			</div>
 {% for sensor in sensorInfo %}
@@ -109,7 +140,7 @@ function manageService(serviceName,action) {
 }
 
 function deleteSensor(sensorMac) {
-  $.post('deleteSensor',
+  $.post('/deleteSensor',
       {
         'sensorMac': sensorMac,
         'csrf_token': '{{ csrf_token() }}'
@@ -118,6 +149,33 @@ function deleteSensor(sensorMac) {
         window.location.reload();
       }
     );
+}
+
+function settingsChange(setting) {
+ 
+ if (setting == 'monitor') {
+   value=document.getElementById("defaultMonitor").value
+ }
+ else if (setting == 'isolate') {
+   value=document.getElementById("defaultIsolate").value
+ }
+ else if (setting == 'fw') {
+   value=document.getElementById("defaultFW").value
+ }
+ else if (setting == 'logRetention') {
+   value=document.getElementById("logRetention").value
+ }
+ $.post('/settings/modify',
+      {
+        'setting': setting,
+        'csrf_token': '{{ csrf_token() }}',
+        'value': value
+      },
+      function (response, status) {
+        window.location.reload();
+      }
+    );
+
 }
 
 </script>

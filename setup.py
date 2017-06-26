@@ -183,14 +183,14 @@ if __name__=="__main__":
 		else:
 			print "Skipping Critical Stack Install"
 		#Check if We Should Install Fail2Ban
-		while True:
-			installFail2Ban = get_user_input("\033[1mInstall Fail2Ban (Y/n)\033[0m: ")
-			if installFail2Ban.lower() not in ('y', 'n', ''):
-				print "Must choose Y or N."
-			else:
-				break
-		if installFail2Ban == 'y' or installFail2Ban == '':
-			fail2ban.install()
+		#while True:
+		#	installFail2Ban = get_user_input("\033[1mInstall Fail2Ban (Y/n)\033[0m: ")
+		#	if installFail2Ban.lower() not in ('y', 'n', ''):
+		#		print "Must choose Y or N."
+		#	else:
+		#		break
+		#if installFail2Ban == 'y' or installFail2Ban == '':
+		#	fail2ban.install()
 		apache.install(installType,chosenInterface,chosenInterfaceIP)
 		print "  Creating web portal credentials"
 		os.popen('sudo htpasswd -cb /etc/apache2/.htpasswd %s "%s"' % (httpUser,httpPass)).read()

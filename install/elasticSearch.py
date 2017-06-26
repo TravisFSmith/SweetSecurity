@@ -1,5 +1,9 @@
 import json, os, shutil, sys
 from time import sleep
+try:
+	from elasticsearch import Elasticsearch
+except:
+	pass
 
 import hashCheck
 
@@ -65,5 +69,12 @@ def install():
 				print "Error: Waiting for Elasticsearch to start, will try again in 10 seconds..."
 			#Sleep 10 seconds to give ES time to get started
 			sleep(10)
+		try:
+			esService = Elasticsearch()
+			configData = {'defaultMonitor': 0, 'defaultIsolate': 0, 'defaultFW': 1, 'defaultLogRetention': 0}
+			res = esService.index(index='sweet_security', doc_type='configuration', body=configData)
+			return res
+		except Exception, e:
+			return e
 	else:
 		print "Elasticsearch already installed"
