@@ -20,9 +20,9 @@ New Functionality:
 
 Fixes:
   * Optimized Logstash Config
-  * Updated Bro IDS to 2.5
-  * Updated Logstash to version 5.3.0
-  * Updated Elasticsearch to version 5.3.0
-  * Update kibana to version 5.3.0
+  * Updated Bro IDS to 2.5.1
+  * Updated Logstash to version 5.4.3
+  * Updated Elasticsearch to version 5.4.3
+  * Update kibana to version 5.4.3
 
 

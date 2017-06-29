@@ -8,7 +8,7 @@ except:
 import hashCheck
 
 def install():
-	elasticLatest='5.3.0'
+	elasticLatest='5.4.3'
 	#Install Elasticsearch
 	elasticInstalled=False
 	if os.path.isfile('/etc/elasticsearch/elasticsearch.yml'):
@@ -29,16 +29,16 @@ def install():
 			elasticInstalled=True
 	if elasticInstalled == False:
 		print "Installing Elasticsearch"
-		print "  Downloading Elasticsearch 5.3.0"
-		os.popen('sudo wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.3.0.deb 2>&1').read()
-		if not os.path.isfile('elasticsearch-5.3.0.deb'):
+		print "  Downloading Elasticsearch 5.4.3"
+		os.popen('sudo wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.4.3.deb 2>&1').read()
+		if not os.path.isfile('elasticsearch-5.4.3.deb'):
 			sys.exit('Error downloading elasticsearch')
-		if not hashCheck.checkHash('elasticsearch-5.3.0.deb'):
+		if not hashCheck.checkHash('elasticsearch-5.4.3.deb'):
 			sys.exit('Error downloading elasticsearch, mismatched file hashes')
 		print "  Installing Elasticsearch"
-		os.popen('sudo dpkg -i elasticsearch-5.3.0.deb').read()
+		os.popen('sudo dpkg -i elasticsearch-5.4.3.deb').read()
 		print "  Cleaning Up Installation Files"
-		os.remove('elasticsearch-5.3.0.deb')
+		os.remove('elasticsearch-5.4.3.deb')
 		os.popen('sudo update-rc.d elasticsearch defaults').read()
 		#Change heap size to 500m (1/2 of phyical memory)
 		shutil.move('/etc/elasticsearch/jvm.options','/etc/elasticsearch/jvm.orig')
