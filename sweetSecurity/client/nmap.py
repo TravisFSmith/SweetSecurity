@@ -8,7 +8,7 @@ import logs
 import server
 import sweetSecurityDB
 
-dbPath="/opt/sweetsecurity/SweetSecurity.db"
+dbPath="/opt/sweetsecurity/client/SweetSecurity.db"
 
 def getSystemDfgw():
 	with open("/proc/net/route") as file:
@@ -47,8 +47,8 @@ def convertMac(macAddress):
 
 def pingSweep():
 	logger = logging.getLogger('SweetSecurityLogger')
-	if not os.path.exists('/opt/sweetsecurity/nmap_scans'):
-		os.makedirs('/opt/sweetsecurity/nmap_scans')
+	if not os.path.exists('/opt/sweetsecurity/client/nmap_scans'):
+		os.makedirs('/opt/sweetsecurity/client/nmap_scans')
 	device=str(getSpoofingInterface())
 	ip = getIP(device)
 	netmask = getNetmask(device)
@@ -59,8 +59,8 @@ def pingSweep():
 	webAddress=sweetSecurityDB.getWebAddress()
 	logger.info('Beginning Ping Sweep')
 
-	os.popen("sudo nmap -sn %s/%s -e %s -oX /opt/sweetsecurity/nmap_scans/pingSweep.xml" % (ip,str(netmask),device)).read()
-	file='/opt/sweetsecurity/nmap_scans/pingSweep.xml'
+	os.popen("sudo nmap -sn %s/%s -e %s -oX /opt/sweetsecurity/client/nmap_scans/pingSweep.xml" % (ip,str(netmask),device)).read()
+	file='/opt/sweetsecurity/client/nmap_scans/pingSweep.xml'
 	try:
 		tree = ET.parse(file)
 		root = tree.getroot()
@@ -145,8 +145,8 @@ def pingSweep():
 def portScan():
 	logger = logging.getLogger('SweetSecurityLogger')
 	logger.info("Beginning port scan")
-	if not os.path.exists('/opt/sweetsecurity/nmap_scans'):
-		os.makedirs('/opt/sweetsecurity/nmap_scans')
+	if not os.path.exists('/opt/sweetsecurity/client/nmap_scans'):
+		os.makedirs('/opt/sweetsecurity/client/nmap_scans')
 	try:
 		deviceList=[]
 		conn = sqlite3.connect(dbPath)
@@ -159,9 +159,9 @@ def portScan():
 		logger.info("SQL Query Error: %s",str(e))
 	for device in deviceList:
 		logger.info("Port scanning %s",device['ip'])
-		file="/opt/sweetsecurity/nmap_scans/portScan_%s_%s.xml" % (datetime.now().strftime('%Y-%m-%d_%H-%M'),device['ip'])
+		file="/opt/sweetsecurity/client/nmap_scans/portScan_%s_%s.xml" % (datetime.now().strftime('%Y-%m-%d_%H-%M'),device['ip'])
 		os.popen("nmap -sV -oX %s %s" % (file,device['ip'])).read()
-		#file='/opt/sweetsecurity/portScan.xml'
+		#file='/opt/sweetsecurity/client/portScan.xml'
 		try:
 			tree = ET.parse(file)
 			root = tree.getroot()

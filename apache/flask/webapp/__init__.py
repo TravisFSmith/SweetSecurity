@@ -66,6 +66,12 @@ def create_app():
                         'lastSeen': host['_source']['lastSeen'],
                         'openPorts': portCount}
                 deviceList.append(deviceInfo)
+        alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
+        allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
+        if allAlerts['hits']['total'] > 0:
+            flash(u'There are %d new alerts!' % allAlerts['hits']['total'], 'error')
+            alertCount = allAlerts['hits']['total']
+            return render_template('index.html', serverIP=serverIP, deviceList=deviceList, alertCount=alertCount)
         return render_template('index.html', serverIP=serverIP, deviceList=deviceList)
 
     @app.route('/addDevice', methods=['POST', 'GET'])
@@ -443,7 +449,18 @@ def create_app():
                                             sslHosts.append(sslHit['_source']['server_name'])
                             info={'ip': blockedPacket['_source']['dstIP'], 'urls': sslHosts}
                             blockedIPs.append(info)
-            return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, blockedIPs=blockedIPs)
+            deviceAlertCount = 0
+            alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
+            allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
+            alertCount = allAlerts['hits']['total']
+            for ssAlert in allAlerts['hits']['hits']:
+                if ssAlert['_source']['mac'] == deviceInfo['mac']:
+                    deviceAlertCount += 1
+            if deviceAlertCount > 0:
+                flash(u'There are %d alerts for this device' % deviceAlertCount, 'error')
+                return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, blockedIPs=blockedIPs, alertCount=alertCount)
+            else:
+                return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, blockedIPs=blockedIPs)
         else:
             #This happens when the web component is still booting up and the ES index hasn't initialized
             #Sometimes we get two devices, we'll delete the old one and let the sensor send info on it's next update
@@ -837,11 +854,20 @@ def create_app():
                     'memPercent': int(sensor['_source']['memPercent'])
                 }
                 sensorInfo.append(systemInfo)
-
-        return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
+        alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
+        allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
+        if allAlerts['hits']['total'] > 0:
+            flash(u'There are %d new alerts!' % allAlerts['hits']['total'], 'error')
+            alertCount = allAlerts['hits']['total']
+            return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
                                diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo, defaultFW=defaultFW,
                                defaultIsolate=defaultIsolate, defaultMonitor=defaultMonitor,
-                               defaultLogRetention=defaultLogRetention)
+                               defaultLogRetention=defaultLogRetention, alertCount=alertCount)
+        else:
+            return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
+                                   diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo, defaultFW=defaultFW,
+                                   defaultIsolate=defaultIsolate, defaultMonitor=defaultMonitor,
+                                   defaultLogRetention=defaultLogRetention)
 
     @app.route('/settings/modify', methods=['POST'])
     def settingsModify():
@@ -996,6 +1022,137 @@ def create_app():
                 es.consolidate(host['_source']['mac'],esService,'devices')
         flash(u'Devices Consolidated', 'success')
         return redirect('/settings')
+
+    @app.route('/alerts/add', methods=['POST'])
+    def alertAdd():
+        alertType = ''
+        alertMessage = ''
+        logID = ''
+        logIndex = ''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "alertType":
+                    alertType = request.form['alertType']
+                if key == "alertMessage":
+                    alertMessage = request.form['alertMessage']
+                if key == "logID":
+                    logID = request.form['logID']
+                if key == "logIndex":
+                    logIndex = request.form['logIndex']
+        if len(alertType) == 0:
+            statusMessage='Unknown Alert Type'
+            return jsonify(status='404',message=statusMessage)
+        if len(alertMessage) == 0:
+            statusMessage='Blank Message'
+            return jsonify(status='404',message=statusMessage)
+        alertInfo = {'source': alertType,
+                     'message': alertMessage,
+                     'firstSeen': str(int(round(time.time() * 1000))),
+                     'addressed': 0}
+        if len(logID) > 0:
+            res = esService.get(index=logIndex, doc_type='logs', id=logID)
+            resp_p=''
+            orig_p=''
+            website=''
+            resp_h=res['_source']['resp_h']
+            orig_h=res['_source']['orig_h']
+            fileName=''
+            fileMD5=''
+            fileSHA1=''
+            try:
+                resp_p=res['_source']['resp_p']
+                orig_p=res['_source']['orig_p']
+            except: pass
+            if res['_source']['path'] == '/opt/nsm/bro/logs/current/dns.log':
+                website=res['_source']['query']
+            elif res['_source']['path'] == '/opt/nsm/bro/logs/current/http.log' or res['_source']['path'] == '/opt/nsm/bro/logs/current/ssl.log':
+                website=res['_source']['server_name']
+            if res['_source']['path'] == '/opt/nsm/bro/logs/current/files.log':
+                fileName=res['_source']['filename']
+                fileMD5=res['_source']['md5']
+                fileSHA1=res['_source']['sha1']
+            logInfo={'resp_p': resp_p,
+                     'resp_h': resp_h,
+                     'orig_p': orig_p,
+                     'orig_h': orig_h,
+                     'website': website,
+                     'filename': fileName,
+                     'fileMD5': fileMD5,
+                     'fileSHA1': fileSHA1}
+            internalDeviceInfo = {}
+            deviceQuery = {"query": {"match_phrase": {"ip4": {"query": resp_h}}}}
+            deviceInfo = es.search(esService, deviceQuery, 'sweet_security', 'devices')
+            for device in deviceInfo['hits']['hits']:
+                internalDeviceInfo = {'vendor': device['_source']['vendor'],
+                                      'mac': device['_source']['mac'],
+                                      'nickname': device['_source']['nickname']}
+                alertInfo['mac'] = internalDeviceInfo['_source']['mac']
+        else:
+            logInfo={}
+            internalDeviceInfo={}
+            alertInfo['mac'] = 'system'
+        es.write(esService, alertInfo, 'sweet_security_alerts', 'alerts')
+        email.emailUser(mail,"New Sweet Security Alert",recipient,alertMessage)
+        return jsonify(status='200',alertType=alertType,alertMessage=alertMessage,logInfo=logInfo,internalDeviceInfo=internalDeviceInfo)
+
+    @app.route('/alerts')
+    def alerts():
+        serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+        serverIP = serverIP[0]
+        alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
+        allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
+        alertCount=allAlerts['hits']['total']
+        myAlerts=[]
+        for ssAlert in allAlerts['hits']['hits']:
+            firstSeen = float(ssAlert['_source']['firstSeen']) / 1000.0
+            humanDate = datetime.datetime.fromtimestamp(firstSeen).strftime('%Y-%m-%d %H:%M:%S')
+            ssAlert['_source']['firstSeen'] = humanDate
+            myAlerts.append(ssAlert)
+        if alertCount==0:
+            return render_template('alerts.html', serverIP=serverIP, myAlerts=myAlerts)
+        else:
+            return render_template('alerts.html', alertCount=alertCount, serverIP=serverIP, myAlerts=myAlerts)
+
+    @app.route('/alerts/address', methods=['POST'])
+    def alertsAddress():
+        logID = ''
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                if key == "logID":
+                    logID = request.form['logID']
+        if len(logID) == 0:
+            return jsonify(status='404',message='Unknown log id')
+        print logID
+        body = {'doc': {'addressed': 1}}
+        es.update(esService, body, 'sweet_security_alerts', 'alerts', logID)
+        body = {'doc': {'addressedDate': str(int(round(time.time() * 1000)))}}
+        es.update(esService, body, 'sweet_security_alerts', 'alerts', logID)
+        return jsonify(logID=logID)
+
+    @app.route('/alerts/addressed')
+    def alertsAddressed():
+        serverIP = re.search(r'^https?://([\w\d\.\-]+)', request.url).groups()
+        serverIP = serverIP[0]
+        alertQuery = {"query": {"match_phrase": {"addressed": {"query": 1}}}}
+        allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
+        myAlerts = []
+        for ssAlert in allAlerts['hits']['hits']:
+            firstSeen = float(ssAlert['_source']['firstSeen']) / 1000.0
+            firstHumanDate = datetime.datetime.fromtimestamp(firstSeen).strftime('%Y-%m-%d %H:%M:%S')
+            ssAlert['_source']['firstSeen'] = firstHumanDate
+            addressedDate = float(ssAlert['_source']['addressedDate']) / 1000.0
+            addressedHumanDate = datetime.datetime.fromtimestamp(addressedDate).strftime('%Y-%m-%d %H:%M:%S')
+            ssAlert['_source']['addressedDate'] = addressedHumanDate
+            myAlerts.append(ssAlert)
+        alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
+        adressedAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
+        alertCount = adressedAlerts['hits']['total']
+        if alertCount==0:
+            return render_template('addressedAlerts.html', serverIP=serverIP, myAlerts=myAlerts)
+        else:
+            return render_template('addressedAlerts.html', alertCount=alertCount, serverIP=serverIP, myAlerts=myAlerts)
 
     @app.errorhandler(CSRFError)
     #@csrf.error_handler

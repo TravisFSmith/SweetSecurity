@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os, sqlite3, sys
 
-dbPath="/opt/sweetsecurity/SweetSecurity.db"
+dbPath="/opt/sweetsecurity/client/SweetSecurity.db"
 
 def getDfgw():
 	dfgw={'dfgw': None, 'dfgwMAC': None}

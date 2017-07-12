@@ -72,6 +72,19 @@
 						</div>
 					</div>
 					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Delete Log Data Older Than:</strong></div>
+						<div class="col-xs-7">
+							<select id="logRetention" onChange=settingsChange("logRetention")>
+								<option value="7"{% if defaultLogRetention==7 %} selected="selected"{% endif %}>7 Days</option>
+								<option value="14"{% if defaultLogRetention==14 %} selected="selected"{% endif %}>14 Days</option>
+								<option value="30"{% if defaultLogRetention==30 %} selected="selected"{% endif %}>30 Days</option>
+								<option value="90"{% if defaultLogRetention==90 %} selected="selected"{% endif %}>90 Days</option>
+								<option value="180"{% if defaultLogRetention==180 %} selected="selected"{% endif %}>180 Days</option>
+								<option value="0"{% if defaultLogRetention==0 %} selected="selected"{% endif %}>Never</option>
+							</select>
+						</div>
+					</div>
 				</div>
 			</div>
 {% for sensor in sensorInfo %}

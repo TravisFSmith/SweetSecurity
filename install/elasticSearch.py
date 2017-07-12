@@ -1,13 +1,9 @@
 import json, os, shutil, sys
 from time import sleep
-try:
-	from elasticsearch import Elasticsearch
-except:
-	pass
 
 import hashCheck
 
-def install():
+def install(fileCheckKey):
 	elasticLatest='5.4.3'
 	#Install Elasticsearch
 	elasticInstalled=False
@@ -59,9 +55,22 @@ def install():
 		while True:
 			writeSsIndex=os.popen('curl -XPUT \'localhost:9200/sweet_security?pretty\' -H \'Content-Type: application/json\' -d\' {"mappings" : {"ports" : {"properties" : {"mac" : {"type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "port" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}},"protocol" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}},"name" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}},  "product" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "version" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "lastSeen": { "type" : "date" }}}, "devices" : { "properties" : { "hostname" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "nickname" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "ip4" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "mac" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "vendor" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "ignore" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "active" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "defaultFwAction" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "isolate" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "firstSeen" : { "type" : "date" }, "lastSeen" : { "type" : "date" }}}, "firewallProfiles" : { "properties" : { "mac" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "destination" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, "action" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}}}}}\'').read()
 			try:
-				jsonStuff=json.loads(writeSsIndex)
-				if jsonStuff['acknowledged'] == True:
-					print "  Sweet_Security index created"
+				jsonSS=json.loads(writeSsIndex)
+				if jsonSS['acknowledged'] == True:
+					print "  sweet_security index created"
+					break
+				else:
+					print "Waiting for Elasticsearch to start, will try again in 10 seconds..."
+			except:
+				print "Error: Waiting for Elasticsearch to start, will try again in 10 seconds..."
+			#Sleep 10 seconds to give ES time to get started
+			sleep(10)
+		while True:
+			writeSsAlertIndex=os.popen('curl -XPUT \'localhost:9200/sweet_security_alerts?pretty\' -H \'Content-Type: application/json\' -d\'{ "mappings" : { "alerts" : { "properties" : {  "source" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}}, "message" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},  "mac" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}}, "firstSeen" : { "type" : "date" }, "addressedOn" : { "type" : "date" }, "addressed" : { "type" : "integer"}}}}}\'').read()
+			try:
+				jsonSSAlert=json.loads(writeSsAlertIndex)
+				if jsonSSAlert['acknowledged'] == True:
+					print "  sweet_security_alert index created"
 					break
 				else:
 					print "Waiting for Elasticsearch to start, will try again in 10 seconds..."
@@ -70,8 +79,15 @@ def install():
 			#Sleep 10 seconds to give ES time to get started
 			sleep(10)
 		try:
+			try:
+				from elasticsearch import Elasticsearch
+			except:
+				pass
 			esService = Elasticsearch()
-			configData = {'defaultMonitor': 0, 'defaultIsolate': 0, 'defaultFW': 1, 'defaultLogRetention': 0}
+			if fileCheckKey is None:
+				configData = {'defaultMonitor': 0, 'defaultIsolate': 0, 'defaultFW': 1, 'defaultLogRetention': 0}
+			else:
+				configData = {'defaultMonitor': 0, 'defaultIsolate': 0, 'defaultFW': 1, 'defaultLogRetention': 0, 'fileCheckKey': fileCheckKey}
 			res = esService.index(index='sweet_security', doc_type='configuration', body=configData)
 			return res
 		except Exception, e:
