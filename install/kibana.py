@@ -2,8 +2,7 @@ import json
 import os
 import shutil
 import sys
-
-from elasticsearch import Elasticsearch
+from time import sleep
 
 import hashCheck
 
@@ -87,11 +86,21 @@ def install(chosenInterfaceIP):
     for file in os.listdir(dashboardPath):
         importDashboard(os.path.join(dashboardPath, file))
     #Set logstash-* as the default Kibana index
+    from elasticsearch import Elasticsearch
     esService = Elasticsearch()
     body = {'doc' : {'defaultIndex': 'logstash-*'}}
-    esService.update(index='.kibana', id='5.5.0', doc_type='config', body=body)
+    while True:
+
+        try:
+            esService.update(index='.kibana', id='5.5.0', doc_type='config', body=body)
+            break
+        except:
+            print "Waiting for Elasticsearch to start..."
+        sleep(10)
+
 
 def importDashboard(jsonFileName):
+    from elasticsearch import Elasticsearch
     esService = Elasticsearch()
     with open(jsonFileName) as kibana_file:
         dashboardJson = json.load(kibana_file)
@@ -100,6 +109,7 @@ def importDashboard(jsonFileName):
 
 
 def importIndexMapping(jsonFileName):
+    from elasticsearch import Elasticsearch
     esService = Elasticsearch()
     with open(jsonFileName) as kibanaFile:
         jsonString = kibanaFile.read()
