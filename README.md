@@ -2,6 +2,10 @@
 
 Scripts to setup and install Bro IDS, Elasticsearch, Logstash, Kibana, and Critical Stack on any device.
 
+For more information on installation and how Sweet Security works, see the Wiki:
+
+https://github.com/TravisFSmith/SweetSecurity/wiki
+
 Installation:
   * sudo python setup.py
   * Follow prompts to enter appropriate information for chosen installation type
