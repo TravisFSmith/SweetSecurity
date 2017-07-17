@@ -775,7 +775,16 @@ def create_app():
             # email.emailUser(mail,"New Device Found",recipient,emailBody)
         elif len(sensorInfo['hits']['hits']) == 1:
             # update Sensor
-            body = {'doc': {'lastSeen': str(int(round(time.time() * 1000)))}}
+            body = {'doc': {'lastSeen': str(int(round(time.time() * 1000))),
+                            'sensorName': sensorName,
+                            'broHealth': broHealth,
+                            'logstashHealth': logstashHealth,
+                            'diskUsage': diskUsage,
+                            'memAvailable': memAvailable,
+                            'memConsumed': memConsumed,
+                            'memPercent': memPercent
+                            }
+                    }
             es.update(esService, body, 'sweet_security', 'sensors', sensorInfo['hits']['hits'][0]['_id'])
             sensorStatus = 'Update Sensor'
         else:

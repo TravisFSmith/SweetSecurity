@@ -17,7 +17,7 @@ def install(chosenInterface,webServer):
 		print "  Downloading Bro IDS 2.5.1"
 		os.popen('sudo wget https://www.bro.org/downloads/bro-2.5.1.tar.gz 2>&1').read()
 		if not os.path.isfile('bro-2.5.1.tar.gz'):
-			sys.exit('Error downloading Kibana')
+			sys.exit('Error downloading Bro')
 		if not hashCheck.checkHash('bro-2.5.1.tar.gz'):
 			sys.exit('Error downloading Bro, mismatched file hashes')
 		print "  Unpacking Bro Code"
