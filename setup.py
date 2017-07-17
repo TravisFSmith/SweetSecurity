@@ -202,7 +202,6 @@ if __name__ == "__main__":
         os.popen('sudo htpasswd -cb /etc/apache2/.elasticsearch %s "%s"' % (elasticUser, elasticPass)).read()
         # Get system default configurations
         fileCheckKey = None
-        fileCheckKey = None
         while True:
             installFileCheck = get_user_input("\033[1mCheck Files Against FileCheck.IO (y/N)\033[0m: ")
             if installFileCheck.lower() not in ('y', 'n', ''):

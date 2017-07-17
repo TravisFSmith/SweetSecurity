@@ -77,6 +77,8 @@ def install(chosenInterfaceIP):
         os.popen('sudo service kibana start').read()
     else:
         print "Kibana already installed"
+    #Having to induce sleep so Kibana can create initial index stuff
+    sleep(10)
     print "Importing Kibana Index Patterns"
     patternPath = os.path.join(cwd, 'kibana/patterns')
     for file in os.listdir(patternPath):
@@ -97,6 +99,7 @@ def install(chosenInterfaceIP):
         except:
             print "Waiting for Elasticsearch to start..."
         sleep(10)
+
 
 
 def importDashboard(jsonFileName):
