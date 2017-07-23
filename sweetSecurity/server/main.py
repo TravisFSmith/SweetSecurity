@@ -2,6 +2,7 @@ import threading
 import logging.handlers
 from time import sleep
 
+import baseliner
 import logs
 import logRetention
 import filecheckio
@@ -20,6 +21,12 @@ def startFileCheckIO():
 		filecheckio.run()
 		sleep(300)
 
+def startBaseliner():
+	while 1:
+		#Check every 5 minutes
+		baseliner.run()
+		sleep(300)
+
 def doStuff():
 	logger.info('Starting up SweetSecurity Server')
 
@@ -30,6 +37,10 @@ def doStuff():
 	logger.info('Starting FileCheckIO thread')
 	fcioThread = threading.Thread(target=startFileCheckIO)
 	fcioThread.start()
+
+	logger.info('Starting Baseliner thread')
+	baselinerThread = threading.Thread(target=startBaseliner)
+	baselinerThread.start()
 
 
 doStuff()

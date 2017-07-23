@@ -104,17 +104,21 @@
 
 						<div class="panel-group">
 							<div class="panel panel-primary">
-							<div class="panel-heading">Blocked Traffic ({{blockedIPs|length}})<a data-toggle="collapse" href="#blockedTrafficPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+							<div class="panel-heading">Alerts ({{alerts|length}})<a data-toggle="collapse" href="#blockedTrafficPanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
 								<div id="blockedTrafficPanel" class="panel-collapse collapse">
 									<div class="panel-body">
 										<div class="row" style="border-bottom: 2px solid #000;">
-											<div class="col-xs-3"><b>IP Address</b></div>
-											<div class="col-xs-9"><b>Known URLs</b></div>
+											<div class="col-xs-3"><b>Source</b></div>
+											<div class="col-xs-3"><b>Message</b></div>
+											<div class="col-xs-3"><b>Date</b></div>
+											<div class="col-xs-3"><b>&nbsp;</b></div>
 										</div>
-{% for ip in blockedIPs %}
+{% for alert in alerts %}
 										<div class="row" style="border-bottom: 2px solid #000;">
-											<div class="col-xs-3"><span class="glyphicon glyphicon-plus-sign" style="cursor: pointer; color:green"  onclick="addFWRule('{{ip['ip']}}')"></span>&nbsp;{{ip['ip']}}</div>
-											<div class="col-xs-9">{% for url in ip['urls']%}{{url}}<br/>{%endfor%}</div>
+											<div class="col-xs-3">{{alert['_source']['source']|safe}}</div>
+											<div class="col-xs-3">{{alert['_source']['message']|safe}}</div>
+											<div class="col-xs-3">{{alert['_source']['firstSeen']|safe}}</div>
+											<div class="col-xs-3"><button type="button" class="btn btn-primary btn-xs" onclick="addressAlert(this,'{{alert['_id']}}')">Delete</button></div>
 										</div>
 {% endfor %}
 									</div>
@@ -146,6 +150,28 @@
 											<div class="col-xs-2">{{ port['product'] }}</div>
 											<div class="col-xs-2">{{ port['version'] }}</div>
 											<div class="col-xs-2">{{ port['lastSeen'] }}</div>
+										</div>
+{% endfor %}
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+
+						<div class="panel-group">
+							<div class="panel panel-primary">
+								<div class="panel-heading">Baseline Info ({{baseline|length}})<a data-toggle="collapse" href="#baselinePanel" class="pull-right"><span class="glyphicon glyphicon-plus"></span></a></div>
+									<div id="baselinePanel" class="panel-collapse collapse">
+									<div class="panel-body">
+										<div class="row" style="border-bottom: 2px solid #000;">
+											<div class="col-xs-3"><b>Type</b></div>
+											<div class="col-xs-9"><b>Value</b></div>
+										</div>
+{% for entry in baseline %}
+										<div class="row" style="border-bottom: 1px solid #ccc;">
+											<div class="col-xs-3">{{ entry['type']|safe }}</div>
+											<div class="col-xs-9">{{ entry['value']|safe }}</div>
 										</div>
 {% endfor %}
 									</div>
@@ -390,6 +416,17 @@ function isolateDevice(checkboxElem,macAddress,isolate) {
     );
 }
 
+function addressAlert(checkboxElem,logID) {
+  $.post('/alerts/address',
+      { 
+        'logID': logID,
+        'csrf_token': '{{ csrf_token() }}'
+      },
+      function (response, status) {
+        window.location.reload();
+      }
+    );
+}
 </script>
 
 

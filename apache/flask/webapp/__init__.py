@@ -431,36 +431,44 @@ def create_app():
                         fwList.append(entry['_source'])
                 deviceInfo['fwList']=fwList
 
-                blockedIPList=[]
-                blockedIPs=[]
-                blockedTrafficQuery = {"query":{"bool":{"must":[{"match":{"srcIP": host['_source']['ip4'] }},{ "match": { "path": "/var/log/kern.log" }}]}}}
-                blockedTraffic=es.search(esService,blockedTrafficQuery,'logstash-*','logs')
-                if blockedTraffic is not None:
-                    for blockedPacket in blockedTraffic['hits']['hits']:
-                        if blockedPacket['_source']['dstIP'] not in blockedIPList:
-                            blockedIPList.append(blockedPacket['_source']['dstIP'])
-                            sslHosts=[]
-                            sslQuery={"query":{"bool":{"must":[{"match":{"resp_h": blockedPacket['_source']['dstIP'] }},{ "match": { "path": "/opt/nsm/bro/logs/current/ssl.log" }}]}}}
-                            sslInfo=es.search(esService,sslQuery,'logstash-*','logs',10000)
-                            if sslInfo is not None:
-                                for sslHit in sslInfo['hits']['hits']:
-                                    if sslHit['_source']['path'] == '/opt/nsm/bro/logs/current/ssl.log':
-                                        if sslHit['_source']['server_name'] not in sslHosts and sslHit['_source']['server_name'] != '-':
-                                            sslHosts.append(sslHit['_source']['server_name'])
-                            info={'ip': blockedPacket['_source']['dstIP'], 'urls': sslHosts}
-                            blockedIPs.append(info)
             deviceAlertCount = 0
-            alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
+            alertQuery = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"match_phrase": {"addressed": 0}},
+                            {"match_phrase": {"mac": deviceInfo['mac']}}
+                        ]
+                    }
+                }
+            }
             allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
-            alertCount = allAlerts['hits']['total']
+            deviceAlertCount = allAlerts['hits']['total']
             for ssAlert in allAlerts['hits']['hits']:
-                if ssAlert['_source']['mac'] == deviceInfo['mac']:
-                    deviceAlertCount += 1
+                firstSeen = float(ssAlert['_source']['firstSeen']) / 1000.0
+                humanDate = datetime.datetime.fromtimestamp(firstSeen).strftime('%Y-%m-%d %H:%M:%S')
+                ssAlert['_source']['firstSeen'] = humanDate
+
+            baseline = []
+            knownHostQuery = {"query": {"match_phrase": {"mac": {"query": deviceInfo['mac']}}}}
+            knownHostData = es.search(esService, knownHostQuery, 'tardis', 'known_hosts')
+            for device in knownHostData['hits']['hits']:
+                baseline.append({'type': 'ip', 'value': device['_source']['ip']})
+            knownDnsQuery = {"query": {"match_phrase": {"mac": {"query": mac}}}}
+            knownDnsData = es.search(esService, knownDnsQuery, 'tardis', 'known_dnsqueries')
+            for query in knownDnsData['hits']['hits']:
+                baseline.append({'type': 'dns', 'value': query['_source']['query']})
+            knownHostQuery = {"query": {"match_phrase": {"mac": {"query": mac}}}}
+            knownHostData = es.search(esService, knownHostQuery, 'tardis', 'known_websites')
+            for url in knownHostData['hits']['hits']:
+                baseline.append({'type': 'website', 'value': url['_source']['server_name']})
+
             if deviceAlertCount > 0:
                 flash(u'There are %d alerts for this device' % deviceAlertCount, 'error')
-                return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, blockedIPs=blockedIPs, alertCount=alertCount)
+                return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo,
+                                       alertCount=deviceAlertCount,alerts=allAlerts['hits']['hits'], baseline=baseline)
             else:
-                return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, blockedIPs=blockedIPs)
+                return render_template('device.html', serverIP=serverIP, deviceInfo=deviceInfo, baseline=baseline)
         else:
             #This happens when the web component is still booting up and the ES index hasn't initialized
             #Sometimes we get two devices, we'll delete the old one and let the sensor send info on it's next update
@@ -1090,13 +1098,13 @@ def create_app():
                      'fileMD5': fileMD5,
                      'fileSHA1': fileSHA1}
             internalDeviceInfo = {}
-            deviceQuery = {"query": {"match_phrase": {"ip4": {"query": resp_h}}}}
+            deviceQuery = {"query": {"match_phrase": {"ip4": {"query": orig_h}}}}
             deviceInfo = es.search(esService, deviceQuery, 'sweet_security', 'devices')
             for device in deviceInfo['hits']['hits']:
                 internalDeviceInfo = {'vendor': device['_source']['vendor'],
                                       'mac': device['_source']['mac'],
                                       'nickname': device['_source']['nickname']}
-                alertInfo['mac'] = internalDeviceInfo['_source']['mac']
+                alertInfo['mac'] = device['_source']['mac']
         else:
             logInfo={}
             internalDeviceInfo={}
