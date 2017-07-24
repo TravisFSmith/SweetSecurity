@@ -38,7 +38,7 @@ def deleteOldLogs():
 	#Warn user if disk storage is above 85%
 	if diskUsage > 84:
 		message='Server disk usage is at %d%%' % diskUsage
-		response=alert.send('diskcheck',message,None,None)
+		response=alert.send('Disk Check',message,None,None)
 		print response.status_code
 		print response.text
 	logger.info('Cleaning up logs')
