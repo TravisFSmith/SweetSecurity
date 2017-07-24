@@ -97,6 +97,6 @@ def run():
 				if filecheckScore not in [0,404]:
 					logger.info("ALERT: FileCheck.io found a malicious file!")
 					message='FileCheck.io Found a Malicious File\nFile Name: %s\nFile MD5: %s\nFile SHA1: %s\nFileCheckIO Reputation Score: %s' % (fileName,md5,sha1,filecheckScore)
-					alert.send('filecheck',message,file['_id'],file['_index'])
+					alert.send('FileCheckIO',message,file['_id'],file['_index'])
 					print "Sending Message"
 
