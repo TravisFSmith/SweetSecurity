@@ -39,8 +39,6 @@ def deleteOldLogs():
 	if diskUsage > 84:
 		message='Server disk usage is at %d%%' % diskUsage
 		response=alert.send('Disk Check',message,None,None)
-		print response.status_code
-		print response.text
 	logger.info('Cleaning up logs')
 	ssConfig=getSSConfig()
 	defaultLogRetention=ssConfig['defaultLogRetention']
