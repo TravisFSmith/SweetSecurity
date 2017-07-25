@@ -1,0 +1,22 @@
+{
+    "fields": [
+        {"name":"_id","type":"string","count":0,"scripted":false,"indexed":false,"analyzed":false,"doc_values":false,"searchable":false,"aggregatable":false},
+        {"name":"_index","type":"string","count":0,"scripted":false,"indexed":false,"analyzed":false,"doc_values":false,"searchable":false,"aggregatable":false},
+        {"name":"_score","type":"number","count":0,"scripted":false,"indexed":false,"analyzed":false,"doc_values":false,"searchable":false,"aggregatable":false},
+        {"name":"_source","type":"_source","count":0,"scripted":false,"indexed":false,"analyzed":false,"doc_values":false,"searchable":false,"aggregatable":false},
+        {"name":"_type","type":"string","count":0,"scripted":false,"indexed":false,"analyzed":false,"doc_values":false,"searchable":true,"aggregatable":true},
+        {"name":"destination","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":true,"doc_values":false,"searchable":true,"aggregatable":false},
+        {"name":"destination.raw","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":false,"doc_values":true,"searchable":true,"aggregatable":true},
+        {"name":"ip","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":true,"doc_values":false,"searchable":true,"aggregatable":false},
+        {"name":"ip.raw","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":false,"doc_values":true,"searchable":true,"aggregatable":true},
+        {"name":"mac","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":true,"doc_values":false,"searchable":true,"aggregatable":false},
+        {"name":"mac.raw","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":false,"doc_values":true,"searchable":true,"aggregatable":true},
+        {"name":"port","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":true,"doc_values":false,"searchable":true,"aggregatable":false},
+        {"name":"port.raw","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":false,"doc_values":true,"searchable":true,"aggregatable":true},
+        {"name":"query","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":true,"doc_values":false,"searchable":true,"aggregatable":false},
+        {"name":"query.raw","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":false,"doc_values":true,"searchable":true,"aggregatable":true},
+        {"name":"server_name","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":true,"doc_values":false,"searchable":true,"aggregatable":false},
+        {"name":"server_name.raw","type":"string","count":0,"scripted":false,"indexed":true,"analyzed":false,"doc_values":true,"searchable":true,"aggregatable":true}
+    ],
+    "title": "tardis"
+}
