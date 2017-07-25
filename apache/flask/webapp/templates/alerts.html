@@ -21,7 +21,7 @@
 			<tr>
 				<td>{{alert['_source']['source']|safe}}</td>
 				<td>{{alert['_source']['message']|safe}}</td>
-				<td><a href='/device/{{alert['_source']['mac']|safe}}'>{{alert['_source']['mac']|safe}}</a></td>
+				<td>{% if alert['_source']['mac'] == "system" %}<a href='/settings'>Server</a>{%else%}<a href='/device/{{alert['_source']['mac']|safe}}'>{{alert['_source']['mac']|safe}}</a>{%endif%}</td>
 				<td>{{alert['_source']['firstSeen']|safe}}</td>
 				<td><button type="button" class="btn btn-primary btn-xs" onclick="addressAlert(this,'{{alert['_id']}}')">Delete</button></td>
 			</tr>
