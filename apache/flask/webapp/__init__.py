@@ -836,6 +836,15 @@ def create_app():
                 memUsage['consumed'] = line.split()[2]
                 memUsage['percentUsed'] = int(round((float(line.split()[2]) / float(line.split()[1])) * 100, 0))
 
+        ssServerStatus = 'Unknown'
+        serverStatus = os.popen('service sweetsecurity_server status').read()
+        for line in serverStatus.splitlines():
+            if line.lstrip().startswith('Active: '):
+                if line.lstrip().startswith('Active: active (running)'):
+                    ssServerStatus = 'Started'
+                else:
+                    ssServerStatus = 'Stopped'
+
         defaultMonitor = 0
         defaultIsolate = 0
         defaultFW = 0
@@ -879,12 +888,13 @@ def create_app():
             return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
                                diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo, defaultFW=defaultFW,
                                defaultIsolate=defaultIsolate, defaultMonitor=defaultMonitor,
-                               defaultLogRetention=defaultLogRetention, alertCount=alertCount)
+                               defaultLogRetention=defaultLogRetention, alertCount=alertCount,
+                               ssServerStatus=ssServerStatus)
         else:
             return render_template('settings.html', serverIP=serverIP, esHealth=elasticHealth, kHealth=kibanaHealth,
                                    diskUsage=diskUsage, memUsage=memUsage, sensorInfo=sensorInfo, defaultFW=defaultFW,
                                    defaultIsolate=defaultIsolate, defaultMonitor=defaultMonitor,
-                                   defaultLogRetention=defaultLogRetention)
+                                   defaultLogRetention=defaultLogRetention, ssServerStatus=ssServerStatus)
 
     @app.route('/settings/modify', methods=['POST'])
     def settingsModify():
@@ -1006,7 +1016,18 @@ def create_app():
                 os.popen('sudo service kibana stop').read()
             else:
                 return "unknown action"
+        elif serviceName=="sweetsecurity_server":
+            if action == "start":
+                os.popen('sudo service sweetsecurity_server start').read()
+            elif action == "restart":
+                os.popen('sudo service sweetsecurity_server restart').read()
+            elif action == "stop":
+                os.popen('sudo service sweetsecurity_server stop').read()
+            else:
+                return "unknown action"
         return "unknown service"
+        return "unknown service"
+
 
     @app.route('/deleteSensor', methods=['POST'])
     def deleteSensor():

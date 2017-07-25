@@ -48,6 +48,7 @@ def install(installType,chosenInterface,chosenIP):
 	with open("/etc/sudoers", "a") as sudoersFile:
 		sudoersFile.write("\nwww-data        ALL = NOPASSWD: /usr/sbin/service elasticsearch *\n")
 		sudoersFile.write("www-data        ALL = NOPASSWD: /usr/sbin/service kibana *\n")
+		sudoersFile.write("www-data        ALL = NOPASSWD: /usr/sbin/service sweetsecurity_server *\n")
 	
 	while True:
 		apacheEmail = get_user_input("\033[1mConfigure Apache To Send Email Alerts (Y/n)\033[0m: ")

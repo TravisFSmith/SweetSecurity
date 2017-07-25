@@ -5,7 +5,7 @@
 <section>
 	<div class="container">
 		<div class="panel-group">
-			{% if esHealth=="Started" and kHealth=="Started"%}<div class="panel panel-success">{%else%}<div class="panel panel-danger">{%endif%}	
+			{% if esHealth=="Started" and kHealth=="Started" and ssServerStatus=="Started"%}<div class="panel panel-success">{%else%}<div class="panel panel-danger">{%endif%}	
 				<div class="panel-heading">System Services</div>
 				<div class="panel-body">
 					<div class="row">
@@ -16,6 +16,11 @@
 					<div class="row">
 						<div class="col-xs-5"><strong>Kibana</strong> <span class="glyphicon {% if kHealth == "Started" %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
 						<div class="col-xs-7"><button onclick="manageService('kibana','start')"  type="button" class="btn {%if kHealth == "Started" %} btn-default btn-sm" disabled{% else %} btn-success btn-sm"{%endif%}>Start</button> <button onclick="manageService('kibana','restart')" type="button" class="btn btn-warning btn-sm">Restart</button> <button onclick="manageService('kibana','stop')" type="button" class="btn{% if kHealth == "Stopped"%} btn-default btn-sm" disabled{% else %} btn-danger btn-sm"{%endif%}>Stop</button></div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-xs-5"><strong>Sweet Security Server</strong> <span class="glyphicon {% if ssServerStatus == "Started" %}glyphicon-ok-sign" style="color:green"{% else %}glyphicon-exclamation-sign" style="color:red"{%endif%}></span></div>
+						<div class="col-xs-7"><button onclick="manageService('sweetsecurity_server','start')"  type="button" class="btn {%if ssServerStatus == "Started" %} btn-default btn-sm" disabled{% else %} btn-success btn-sm"{%endif%}>Start</button> <button onclick="manageService('sweetsecurity_server','restart')" type="button" class="btn btn-warning btn-sm">Restart</button> <button onclick="manageService('sweetsecurity_server','stop')" type="button" class="btn{% if ssServerStatus == "Stopped"%} btn-default btn-sm" disabled{% else %} btn-danger btn-sm"{%endif%}>Stop</button></div>
 					</div>
 					<br />
 					<div class="row">
