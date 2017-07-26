@@ -80,7 +80,7 @@ def install(fileCheckKey):
 					'   "firewallProfiles" : { "properties" : { ' \
 					'     "mac" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
 					'     "destination" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
-					'     "action" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}},' \
+					'     "action" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}}},' \
 					'   "sensors" : { "properties" : { ' \
 					'     "mac" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
 					'     "sensorName" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
@@ -92,7 +92,7 @@ def install(fileCheckKey):
 					'     "memConsumed" : { "type" : "integer"}, ' \
 					'     "firstSeen" : { "type" : "date" }, ' \
 					'     "lastSeen" : { "type" : "date" }}} ' \
-					'}}}}\''
+					'}}\''
 			writeSsIndex = os.popen(ssIndex).read()
 
 			try:
@@ -148,7 +148,21 @@ def install(fileCheckKey):
 			print e
 			pass
 		while True:
-			writeTardisIndex = os.popen('curl -XPUT \'localhost:9200/tardis?pretty\' -H \'Content-Type: application/json\' -d\' {"mappings" : {"known_hosts" : {"properties" : { "mac" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},"destination" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},"port" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}}}}}}\'').read()
+			tardisIndex='curl -XPUT \'localhost:9200/tardis?pretty\' -H \'Content-Type: application/json\' -d\'' \
+					' {"mappings" : {' \
+					'   "known_dnsqueries" : {"properties" : {' \
+					'     "mac" : {"type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
+					'     "query" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}}},' \
+					'   "known_websites" : { "properties" : { ' \
+					'     "mac" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
+					'     "server_name" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}}}, ' \
+					'   "firewallProfiles" : { "properties" : { ' \
+					'     "mac" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
+					'     "ip" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}, ' \
+					'     "port" : { "type" : "text", "fields": {"keyword": {"type": "keyword"}}}}}' \
+					'}}\''
+			writeTardisIndex = os.popen(tardisIndex).read()
+			#writeTardisIndex = os.popen('curl -XPUT \'localhost:9200/tardis?pretty\' -H \'Content-Type: application/json\' -d\' {"mappings" : {"known_hosts" : {"properties" : { "mac" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},"destination" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}},"port" : { "type" : "text", "fields": {"raw": {"type": "keyword"}}}}}}}\'').read()
 			try:
 				jsonSS = json.loads(writeTardisIndex)
 				if jsonSS['acknowledged'] == True:
