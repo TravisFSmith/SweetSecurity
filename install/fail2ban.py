@@ -1,7 +1,7 @@
 import os, shutil
 
 def install():
-    os.popen('sudo apt-get install fail2ban 2>&1').read()
+    os.popen('sudo apt-get install --yes fail2ban 2>&1').read()
     cpuArch = os.uname()[4]
     if cpuArch.startswith('x86'):
         shutil.move('/etc/fail2ban/jail.d/defaults-debian.conf', '/etc/fail2ban/jail.d/defaults-debian.orig')
