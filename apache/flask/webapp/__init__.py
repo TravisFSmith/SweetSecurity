@@ -1131,7 +1131,8 @@ def create_app():
             internalDeviceInfo={}
             alertInfo['mac'] = 'system'
         es.write(esService, alertInfo, 'sweet_security_alerts', 'alerts')
-        email.emailUser(mail,"New Sweet Security Alert",recipient,alertMessage)
+        # Uncomment line below after include ALL alerts in email config
+        #email.emailUser(mail,"New Sweet Security Alert",recipient,alertMessage)
         return jsonify(status='200',alertType=alertType,alertMessage=alertMessage,logInfo=logInfo,internalDeviceInfo=internalDeviceInfo)
 
     @app.route('/alerts')
